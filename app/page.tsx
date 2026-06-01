@@ -120,7 +120,7 @@ export default function Home() {
 
   return (
     <main style={{ backgroundColor: theme.bg, color: theme.text, minHeight: "100vh" }}>
-      <div style={{ maxWidth: 960, margin: "0 auto", padding: "40px 24px" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "40px 24px" }}>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
