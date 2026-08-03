@@ -17,27 +17,114 @@ FYLKENAVN = {
     "50":"Trøndelag","55":"Troms","56":"Finnmark",
 }
 
+# NACE 2-sifret kode -> lesbar kategori (matcher lib/bransjer.ts)
 NACE_KATEGORIER = {
-    "01":"Jordbruk","02":"Skogbruk","03":"Fiske","05":"Bergverk",
-    "10":"Næringsmiddel","11":"Drikkevarer","13":"Tekstil","14":"Bekledning",
-    "16":"Trevarer","17":"Papir","18":"Trykking","19":"Petroleum",
-    "20":"Kjemikalier","21":"Legemidler","22":"Gummi/plast","23":"Mineral",
-    "24":"Metall","25":"Metallvarer","26":"Elektronikk","27":"Elektrisk utstyr",
-    "28":"Maskiner","29":"Motorkjøretøy","30":"Transportmidler","31":"Møbler",
-    "32":"Annen industri","33":"Reparasjon","35":"Energi","36":"Vann",
-    "37":"Avløp","38":"Avfall","41":"Byggevirksomhet","42":"Anlegg",
-    "43":"Spesialisert bygg","45":"Bilhandel","46":"Engros","47":"Detaljhandel",
-    "49":"Landtransport","50":"Sjøtransport","51":"Lufttransport","52":"Lagring",
-    "53":"Post","55":"Overnatting","56":"Servering","58":"Forlag",
-    "59":"Film/TV","60":"Kringkasting","61":"Telekommunikasjon","62":"IT-tjenester",
-    "63":"Informasjonstjenester","64":"Finans","65":"Forsikring","66":"Finanshjelp",
-    "68":"Eiendom","69":"Juridisk","70":"Ledelseskonsulent","71":"Arkitekt/ingeniør",
-    "72":"Forskning","73":"Reklame/marked","74":"Annen faglig","75":"Veterinær",
-    "77":"Utleie","78":"Arbeidskraft","79":"Reise","80":"Vakt/sikkerhet",
-    "81":"Renhold/eiendomsdrift","82":"Kontortjenester","84":"Offentlig forvaltning",
-    "85":"Utdanning","86":"Helse","87":"Pleie","88":"Sosiale tjenester",
-    "90":"Kunst","91":"Bibliotek/museum","92":"Lotteri/spill","93":"Sport/fritid",
-    "94":"Organisasjoner","95":"Reparasjon forbruker","96":"Andre personlige tjenester",
+    # Primærnæring
+    "01": "Jordbruk & landbruk",
+    "02": "Skogbruk",
+    "03": "Fiske & havbruk",
+    "05": "Bergverk & utvinning",
+    "06": "Olje & gass",
+    "07": "Bergverk & utvinning",
+    "08": "Bergverk & utvinning",
+    "09": "Olje & gass",
+    # Industri
+    "10": "Næringsmiddelproduksjon",
+    "11": "Drikkevarer & bryggeri",
+    "12": "Annen industri",
+    "13": "Tekstil & bekledning",
+    "14": "Tekstil & bekledning",
+    "15": "Tekstil & bekledning",
+    "16": "Møbler & trebearbeiding",
+    "17": "Papir & emballasje",
+    "18": "Forlag & innholdsproduksjon",
+    "19": "Olje & gass",
+    "20": "Kjemikalier & plast",
+    "21": "Apotek & farmasøytisk",
+    "22": "Kjemikalier & plast",
+    "23": "Metallvarer & verksted",
+    "24": "Metall & stål",
+    "25": "Metallvarer & verksted",
+    "26": "Elektronikk & elektrisk utstyr",
+    "27": "Elektronikk & elektrisk utstyr",
+    "28": "Maskiner & utstyr",
+    "29": "Motorkjøretøy & deler",
+    "30": "Motorkjøretøy & deler",
+    "31": "Møbler & trebearbeiding",
+    "32": "Annen industri",
+    "33": "Maskiner & utstyr",
+    # Energi
+    "35": "Fornybar energi & strøm",
+    "36": "Vannforsyning",
+    "37": "Avfall & gjenvinning",
+    "38": "Avfall & gjenvinning",
+    "39": "Avfall & gjenvinning",
+    # Bygg
+    "41": "Byggevirksomhet",
+    "42": "Anlegg & infrastruktur",
+    "43": "Spesialisert bygg & installasjon",
+    # Handel
+    "45": "Bilhandel & deler",
+    "46": "Engroshandel",
+    "47": "Detaljhandel",
+    # Transport
+    "49": "Landtransport & speditør",
+    "50": "Sjøtransport & shipping",
+    "51": "Lufttransport",
+    "52": "Lagring & lager",
+    "53": "Post & budtjenester",
+    # Overnatting & servering
+    "55": "Hotell & overnatting",
+    "56": "Restauranter & kafeer",
+    # Informasjon
+    "58": "Forlag & innholdsproduksjon",
+    "59": "Film, foto & video",
+    "60": "Kringkasting & radio",
+    "61": "Telekommunikasjon",
+    "62": "Programvareutvikling & IT",
+    "63": "Informasjonstjenester & databaser",
+    # Finans
+    "64": "Finans, bank & investering",
+    "65": "Forsikring",
+    "66": "Inkasso & kredittjenester",
+    # Eiendom
+    "68": "Eiendomsutvikling & -forvaltning",
+    # Faglig
+    "69": "Juridiske tjenester & advokater",
+    "70": "Ledelseskonsulenter & strategi",
+    "71": "Arkitekter & rådgivende ingeniører",
+    "72": "Forskning & FoU",
+    "73": "Reklame & mediebyråer",
+    "74": "Film, foto & video",
+    "75": "Veterinær & dyreklinikk",
+    # Utleie & tjenester
+    "77": "Eiendomsdrift & vedlikehold",
+    "78": "HR, rekruttering & bemanning",
+    "79": "Reise & turisme",
+    "80": "Vakt & sikkerhet",
+    "81": "Renhold & vask",
+    "82": "Kontortjenester & administrasjon",
+    # Offentlig
+    "84": "Offentlig forvaltning",
+    # Utdanning
+    "85": "Utdanning & skole",
+    # Helse
+    "86": "Legekontor & spesialisthelsetjeneste",
+    "87": "Sykehjem & hjemmetjenester",
+    "88": "Barnevern & sosiale tjenester",
+    # Kultur
+    "90": "Sport, fritid & kultur",
+    "91": "Sport, fritid & kultur",
+    "92": "Lotteri & spill",
+    "93": "Treningssenter & idrett",
+    # Org
+    "94": "Frivillige organisasjoner & ideell",
+    # Personlig
+    "95": "Reparasjon av forbruksvarer",
+    "96": "Frisør, skjønnhet & velvære",
+    "97": "Andre personlige tjenester",
+    "98": "Andre personlige tjenester",
+    "99": "Andre personlige tjenester",
 }
 
 def get_nace_kategori(kode):
@@ -64,10 +151,8 @@ def last_ned_alle():
     return enheter
 
 def hent_regnskap_batch(orgnumre, batch_size=20):
-    """Henter regnskapstall for en liste med orgnumre."""
     resultat = {}
     total = len(orgnumre)
-    
     for i in range(0, total, batch_size):
         batch = orgnumre[i:i+batch_size]
         for orgnr in batch:
@@ -88,18 +173,11 @@ def hent_regnskap_batch(orgnumre, batch_size=20):
                 driftsresultat = siste.get("resultatregnskapResultat", {}).get("driftsresultat", {}).get("driftsresultat") or 0
                 aarsresultat = siste.get("resultatregnskapResultat", {}).get("aarsresultat") or 0
                 aar = (siste.get("regnskapsperiode", {}).get("fraDato") or "")[:4]
-                
                 if inntekter > 0:
                     margin = driftsresultat / inntekter
-                    if margin > 0.1:
-                        lonnsomhet = "god"
-                    elif margin >= 0:
-                        lonnsomhet = "ok"
-                    else:
-                        lonnsomhet = "lav"
+                    lonnsomhet = "god" if margin > 0.1 else "ok" if margin >= 0 else "lav"
                 else:
                     lonnsomhet = "ingen"
-                
                 resultat[orgnr] = {
                     "aar": aar,
                     "inntekter": inntekter,
@@ -110,10 +188,8 @@ def hent_regnskap_batch(orgnumre, batch_size=20):
             except Exception:
                 continue
             time.sleep(0.05)
-        
         if i % 500 == 0:
             print(f"    Regnskap: {min(i+batch_size, total):,}/{total:,}...", flush=True)
-    
     return resultat
 
 def parse_enhet(e):
@@ -143,17 +219,16 @@ def parse_enhet(e):
 def main():
     os.makedirs("data", exist_ok=True)
     ts = datetime.now().isoformat()
-
     alle = last_ned_alle()
 
     segmenter = {
-        "ENK":  {"form": ["ENK"],                 "fra": None, "til": None, "regnskap": False},
-        "SMB":  {"form": ["AS","ANS","DA","NUF"],  "fra": 1,   "til": 49,  "regnskap": True},
-        "MID":  {"form": ["AS","ANS","NUF"],       "fra": 50,  "til": 200, "regnskap": True},
-        "STOR": {"form": ["AS","ANS","NUF"],       "fra": 201, "til": None,"regnskap": True},
+        "ENK":  {"form": ["ENK"],                 "fra": None, "til": None,  "regnskap": False},
+        "SMB":  {"form": ["AS","ANS","DA","NUF"],  "fra": 1,   "til": 49,   "regnskap": True},
+        "MID":  {"form": ["AS","ANS","NUF"],       "fra": 50,  "til": 200,  "regnskap": True},
+        "STOR": {"form": ["AS","ANS","NUF"],       "fra": 201, "til": None, "regnskap": True},
     }
 
-    print("\nSegmenterer og henter regnskap...")
+    print("\nSegmenterer...")
     for key, cfg in segmenter.items():
         resultat = []
         for e in alle:

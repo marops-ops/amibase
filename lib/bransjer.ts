@@ -5,48 +5,166 @@ export interface BransjeGruppe {
 
 export const BRANSJE_GRUPPER: BransjeGruppe[] = [
   {
-    label: "Produksjon & industri",
-    kategorier: ["Næringsmiddel","Drikkevarer","Tekstil","Bekledning","Trevarer","Papir","Trykking","Petroleum","Kjemikalier","Legemidler","Gummi/plast","Mineral","Metall","Metallvarer","Elektronikk","Elektrisk utstyr","Maskiner","Motorkjøretøy","Transportmidler","Møbler","Annen industri","Reparasjon","Energi","Vann","Avløp","Avfall"],
+    label: "Bygg, eiendom & anlegg",
+    kategorier: [
+      "Byggevirksomhet",
+      "Anlegg & infrastruktur",
+      "Spesialisert bygg & installasjon",
+      "Eiendomsutvikling & -forvaltning",
+      "Arkitekter & rådgivende ingeniører",
+    ],
   },
   {
-    label: "Bygg & eiendom",
-    kategorier: ["Byggevirksomhet","Anlegg","Spesialisert bygg","Eiendom"],
+    label: "Handel & detaljhandel",
+    kategorier: [
+      "Detaljhandel",
+      "Engroshandel",
+      "Bilhandel & deler",
+      "Netthandel & postordre",
+    ],
   },
   {
-    label: "Handel & transport",
-    kategorier: ["Bilhandel","Engros","Detaljhandel","Landtransport","Sjøtransport","Lufttransport","Lagring","Post"],
+    label: "Mat, drikke & overnatting",
+    kategorier: [
+      "Restauranter & kafeer",
+      "Hotell & overnatting",
+      "Næringsmiddelproduksjon",
+      "Drikkevarer & bryggeri",
+    ],
   },
   {
-    label: "Teknologi & media",
-    kategorier: ["IT-tjenester","Informasjonstjenester","Telekommunikasjon","Film/TV","Kringkasting","Forlag"],
+    label: "Transport & logistikk",
+    kategorier: [
+      "Landtransport & speditør",
+      "Sjøtransport & shipping",
+      "Lufttransport",
+      "Lagring & lager",
+      "Post & budtjenester",
+    ],
   },
   {
-    label: "Finans & juss",
-    kategorier: ["Finans","Forsikring","Finanshjelp","Juridisk","Ledelseskonsulent"],
+    label: "Teknologi & digitale tjenester",
+    kategorier: [
+      "Programvareutvikling & IT",
+      "Telekommunikasjon",
+      "Informasjonstjenester & databaser",
+      "Film, foto & video",
+    ],
+  },
+  {
+    label: "Markedsføring & kommunikasjon",
+    kategorier: [
+      "Reklame & mediebyråer",
+      "Kringkasting & radio",
+      "Forlag & innholdsproduksjon",
+    ],
+  },
+  {
+    label: "Økonomi, regnskap & juss",
+    kategorier: [
+      "Regnskap & bokføring",
+      "Revisjon",
+      "Juridiske tjenester & advokater",
+      "Finans, bank & investering",
+      "Forsikring",
+      "Inkasso & kredittjenester",
+    ],
+  },
+  {
+    label: "Konsulent & rådgivning",
+    kategorier: [
+      "Ledelseskonsulenter & strategi",
+      "HR, rekruttering & bemanning",
+      "Skatte- & avgiftsrådgivning",
+    ],
   },
   {
     label: "Helse & omsorg",
-    kategorier: ["Helse","Pleie","Sosiale tjenester","Veterinær"],
+    kategorier: [
+      "Legekontor & spesialisthelsetjeneste",
+      "Tannlege & tannhelse",
+      "Fysioterapi & rehabilitering",
+      "Psykologi & psykisk helse",
+      "Apotek & farmasøytisk",
+      "Sykehjem & hjemmetjenester",
+      "Barnevern & sosiale tjenester",
+      "Veterinær & dyreklinikk",
+    ],
   },
   {
-    label: "Mat & overnatting",
-    kategorier: ["Servering","Overnatting"],
+    label: "Utdanning & opplæring",
+    kategorier: [
+      "Utdanning & skole",
+      "Barnehage",
+      "Kurs & etterutdanning",
+    ],
   },
   {
-    label: "Faglig & marked",
-    kategorier: ["Reklame/marked","Forskning","Arkitekt/ingeniør","Annen faglig","Kontortjenester","Arbeidskraft","Utleie","Renhold/eiendomsdrift","Vakt/sikkerhet","Reise"],
+    label: "Industri & produksjon",
+    kategorier: [
+      "Metall & stål",
+      "Metallvarer & verksted",
+      "Maskiner & utstyr",
+      "Elektronikk & elektrisk utstyr",
+      "Kjemikalier & plast",
+      "Møbler & trebearbeiding",
+      "Papir & emballasje",
+      "Tekstil & bekledning",
+      "Motorkjøretøy & deler",
+      "Annen industri",
+    ],
   },
   {
-    label: "Offentlig & org",
-    kategorier: ["Offentlig forvaltning","Utdanning","Organisasjoner","Bibliotek/museum","Kunst","Sport/fritid","Lotteri/spill","Andre personlige tjenester","Reparasjon forbruker"],
+    label: "Energi, miljø & ressurser",
+    kategorier: [
+      "Olje & gass",
+      "Fornybar energi & strøm",
+      "Vannforsyning",
+      "Avfall & gjenvinning",
+    ],
   },
   {
     label: "Primærnæring",
-    kategorier: ["Jordbruk","Skogbruk","Fiske","Bergverk"],
+    kategorier: [
+      "Jordbruk & landbruk",
+      "Skogbruk",
+      "Fiske & havbruk",
+      "Bergverk & utvinning",
+    ],
   },
   {
-    label: "Annet",
-    kategorier: ["Annet","Ukjent"],
+    label: "Personlige tjenester & fritid",
+    kategorier: [
+      "Frisør, skjønnhet & velvære",
+      "Treningssenter & idrett",
+      "Sport, fritid & kultur",
+      "Reise & turisme",
+      "Reparasjon av forbruksvarer",
+      "Andre personlige tjenester",
+    ],
+  },
+  {
+    label: "Renhold, vakt & facility",
+    kategorier: [
+      "Renhold & vask",
+      "Vakt & sikkerhet",
+      "Eiendomsdrift & vedlikehold",
+      "Kontortjenester & administrasjon",
+    ],
+  },
+  {
+    label: "Offentlig, ideell & org",
+    kategorier: [
+      "Offentlig forvaltning",
+      "Frivillige organisasjoner & ideell",
+      "Lotteri & spill",
+    ],
+  },
+  {
+    label: "Forskning & utvikling",
+    kategorier: [
+      "Forskning & FoU",
+    ],
   },
 ];
 
