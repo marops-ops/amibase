@@ -105,15 +105,12 @@ def main():
     ts = datetime.now().isoformat()
     alle = last_ned_alle()
 
+    # ENK lagres ikke — hentes live i appen
     segmenter = {
         "SMB":  {"form": ["AS","ANS","DA","NUF"], "fra": 1,   "til": 49},
         "MID":  {"form": ["AS","ANS","NUF"],      "fra": 50,  "til": 200},
         "STOR": {"form": ["AS","ANS","NUF"],      "fra": 201, "til": None},
     }
-
-    # ENK splittes per fylke for å holde filene under 100MB
-    enk_per_fylke: dict = {kode: [] for kode in FYLKENAVN}
-    enk_ukjent = []
 
     print("\nSegmenterer...")
     for key, cfg in segmenter.items():
@@ -141,49 +138,7 @@ def main():
         path = f"data/{key}.json"
         with open(path, "w", encoding="utf-8") as f:
             json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
-        print(f"  ✓ {key}: {len(resultat):,} enheter → {path}")
-
-    # ENK per fylke
-    for e in alle:
-        if e.get("konkurs", "").strip().lower() == "true":
-            continue
-        if e.get("underAvvikling", "").strip().lower() == "true":
-            continue
-        if e.get("organisasjonsform.kode", "").strip() != "ENK":
-            continue
-        parsed = parse_enhet(e)
-        fylkekode = parsed["fylkekode"]
-        if fylkekode in enk_per_fylke:
-            enk_per_fylke[fylkekode].append(parsed)
-        else:
-            enk_ukjent.append(parsed)
-
-    alle_enk = []
-    for fylkekode, enheter in enk_per_fylke.items():
-        alle_enk.extend(enheter)
-
-    alle_enk.extend(enk_ukjent)
-
-    # Lagre ENK som én fil men med minimale felter
-    enk_slim = [{
-        "orgnr": e["orgnr"],
-        "navn": e["navn"],
-        "form": e["form"],
-        "ansatte": e["ansatte"],
-        "adresse": e["adresse"],
-        "postnummer": e["postnummer"],
-        "poststed": e["poststed"],
-        "fylke": e["fylke"],
-        "fylkekode": e["fylkekode"],
-        "nace": e["nace"],
-        "kategori": e["kategori"],
-        "regnskap": None,
-    } for e in alle_enk]
-
-    out = {"oppdatert": ts, "antall": len(enk_slim), "enheter": enk_slim}
-    with open("data/ENK.json", "w", encoding="utf-8") as f:
-        json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
-    print(f"  ✓ ENK: {len(enk_slim):,} enheter → data/ENK.json")
+        print(f"  ✓ {key}: {len(resultat):,} → {path}")
 
     print("\n✓ Ferdig!")
 
