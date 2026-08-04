@@ -18,6 +18,9 @@ jobs:
       - name: Installer avhengigheter
         run: pip install requests
 
+      - name: Slett gamle datafiler
+        run: rm -f data/ENK.json data/SMB.json data/MID.json data/STOR.json
+
       - name: Hent og segmenter bedrifter
         run: python scripts/fetch_enheter.py
 
