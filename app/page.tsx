@@ -45,19 +45,35 @@ export default function Home() {
   }, [darkMode]);
 
   useEffect(() => {
-    async function loadAll() {
-      for (const seg of SEGMENTS) {
-        setSegments(prev => ({ ...prev, [seg.key]: { ...prev[seg.key], state: "loading" } }));
-        try {
-          const res = await fetch(`/api/data/${seg.key}`);
+    async function loadSegment(key: SegmentKey) {
+      setSegments(prev => ({ ...prev, [key]: { ...prev[key], state: "loading" } }));
+      try {
+        if (key === "ENK") {
+          // Hent ENK live fra API, paginer gjennom alle sider
+          const alleEnk: Enhet[] = [];
+          let p = 0;
+          while (true) {
+            const res = await fetch(`/api/enk?page=${p}`);
+            const json = await res.json();
+            alleEnk.push(...(json.enheter ?? []));
+            if (p + 1 >= (json.totalPages ?? 1) || p >= 99) break;
+            p++;
+          }
+          setSegments(prev => ({ ...prev, ENK: { data: alleEnk, state: "done", oppdatert: "" } }));
+        } else {
+          const res = await fetch(`/api/data/${key}`);
           const json = await res.json();
-          setSegments(prev => ({ ...prev, [seg.key]: { data: json.enheter ?? [], state: "done", oppdatert: json.oppdatert ?? "" } }));
-        } catch {
-          setSegments(prev => ({ ...prev, [seg.key]: { ...prev[seg.key], state: "error" } }));
+          setSegments(prev => ({
+            ...prev,
+            [key]: { data: json.enheter ?? [], state: "done", oppdatert: json.oppdatert ?? "" },
+          }));
         }
+      } catch {
+        setSegments(prev => ({ ...prev, [key]: { ...prev[key], state: "error" } }));
       }
     }
-    loadAll();
+
+    for (const seg of SEGMENTS) loadSegment(seg.key);
   }, []);
 
   function toggleSegment(key: SegmentKey) {
@@ -122,10 +138,9 @@ export default function Home() {
     <main style={{ backgroundColor: theme.bg, color: theme.text, minHeight: "100vh" }}>
       <div style={{ maxWidth: 1400, margin: "0 auto", padding: "40px 24px" }}>
 
-        {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <img src={darkMode ? "/logo_light.png" : "/logo_dark.png"} alt="AmiBase" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "contain" }} />
+            <img src={darkMode ? "/logo_dark.png" : "/logo_light.png"} alt="AmiBase" style={{ width: 40, height: 40, borderRadius: 8, objectFit: "contain" }} />
             <div>
               <div style={{ fontSize: 18, fontWeight: 600, color: theme.text }}>AmiBase</div>
               <div style={{ fontSize: 13, color: theme.textMuted }}>Bedriftstargeting gjort enkelt</div>
@@ -139,7 +154,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Metrics */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 32 }}>
           {[
             { label: "Totalt", val: totalCount, sub: "aktive enheter" },
@@ -149,18 +163,18 @@ export default function Home() {
           ].map(m => (
             <div key={m.label} style={s.card}>
               <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 4 }}>{m.label}</div>
-              <div style={{ fontSize: 24, fontWeight: 500, color: theme.text }}>{segments.ENK.state === "loading" ? "…" : m.val.toLocaleString("nb-NO")}</div>
+              <div style={{ fontSize: 24, fontWeight: 500, color: theme.text }}>
+                {segments.SMB.state === "loading" ? "…" : m.val.toLocaleString("nb-NO")}
+              </div>
               <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 2 }}>{m.sub}</div>
             </div>
           ))}
         </div>
 
-        {/* Segment label */}
         <div style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
           Velg segment — klikk for å toggle, kombiner flere
         </div>
 
-        {/* Segment cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 32 }}>
           {SEGMENTS.map(seg => (
             <div key={seg.key} onClick={() => toggleSegment(seg.key)} style={{
@@ -174,14 +188,14 @@ export default function Home() {
               </div>
               <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 10 }}>{seg.desc}</div>
               <div style={{ fontSize: 20, fontWeight: 500, color: theme.text }}>
-                {segments[seg.key].state === "done" ? segments[seg.key].data.length.toLocaleString("nb-NO") : "—"}
+                {segments[seg.key].state === "loading" ? "…" :
+                 segments[seg.key].state === "done" ? segments[seg.key].data.length.toLocaleString("nb-NO") : "—"}
               </div>
               <div style={{ fontSize: 11, color: theme.textMuted }}>aktive enheter</div>
             </div>
           ))}
         </div>
 
-        {/* Tabs */}
         <div style={{ display: "flex", gap: 4, borderBottom: `1px solid ${theme.border}`, marginBottom: 20 }}>
           {([{ key: "liste", label: "Bedriftsliste" }, { key: "region", label: "Per region" }, { key: "lonnsomhet", label: "Lønnsomhet" }] as const).map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
@@ -194,7 +208,6 @@ export default function Home() {
 
         {activeTab === "liste" && (
           <>
-            {/* Søk + fylke + eksport */}
             <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
               <div style={{ position: "relative", flex: 1, minWidth: 160 }}>
                 <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: theme.textMuted }}>⌕</span>
@@ -214,7 +227,6 @@ export default function Home() {
                 style={{ backgroundColor: "#0a66c2", color: "white", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 14, fontWeight: 500, cursor: "pointer" }}>↓ LinkedIn</button>
             </div>
 
-            {/* Bransjefilter */}
             {bransjerInitialisert && (
               <BransjeFilter
                 tilgjengelige={tilgjengeligeBransjer}
@@ -224,7 +236,6 @@ export default function Home() {
               />
             )}
 
-            {/* Tabell */}
             <div style={s.table}>
               <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
                 <thead>
