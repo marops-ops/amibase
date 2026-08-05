@@ -4,7 +4,11 @@ import json
 import os
 import io
 import gzip
+import sys
 from datetime import datetime
+
+sys.path.insert(0, os.path.dirname(__file__))
+from nace_kategorier import get_nace_kategori
 
 LASTNED_URL = "https://data.brreg.no/enhetsregisteret/api/enheter/lastned/csv"
 
@@ -14,49 +18,6 @@ FYLKENAVN = {
     "39":"Vestfold","40":"Telemark","42":"Agder","46":"Vestland",
     "50":"Trøndelag","55":"Troms","56":"Finnmark",
 }
-
-NACE_KATEGORIER = {
-    "01":"Jordbruk & landbruk","02":"Skogbruk","03":"Fiske & havbruk",
-    "05":"Bergverk & utvinning","06":"Olje & gass","07":"Bergverk & utvinning",
-    "08":"Bergverk & utvinning","09":"Olje & gass",
-    "10":"Næringsmiddelproduksjon","11":"Drikkevarer & bryggeri","12":"Annen industri",
-    "13":"Tekstil & bekledning","14":"Tekstil & bekledning","15":"Tekstil & bekledning",
-    "16":"Møbler & trebearbeiding","17":"Papir & emballasje","18":"Forlag & innholdsproduksjon",
-    "19":"Olje & gass","20":"Kjemikalier & plast","21":"Apotek & farmasøytisk",
-    "22":"Kjemikalier & plast","23":"Metallvarer & verksted","24":"Metall & stål",
-    "25":"Metallvarer & verksted","26":"Elektronikk & elektrisk utstyr",
-    "27":"Elektronikk & elektrisk utstyr","28":"Maskiner & utstyr",
-    "29":"Motorkjøretøy & deler","30":"Motorkjøretøy & deler",
-    "31":"Møbler & trebearbeiding","32":"Annen industri","33":"Maskiner & utstyr",
-    "35":"Fornybar energi & strøm","36":"Vannforsyning",
-    "37":"Avfall & gjenvinning","38":"Avfall & gjenvinning","39":"Avfall & gjenvinning",
-    "41":"Byggevirksomhet","42":"Anlegg & infrastruktur","43":"Spesialisert bygg & installasjon",
-    "45":"Bilhandel & deler","46":"Engroshandel","47":"Detaljhandel",
-    "49":"Landtransport & speditør","50":"Sjøtransport & shipping","51":"Lufttransport",
-    "52":"Lagring & lager","53":"Post & budtjenester",
-    "55":"Hotell & overnatting","56":"Restauranter & kafeer",
-    "58":"Forlag & innholdsproduksjon","59":"Film, foto & video","60":"Kringkasting & radio",
-    "61":"Telekommunikasjon","62":"Programvareutvikling & IT","63":"Informasjonstjenester & databaser",
-    "64":"Finans, bank & investering","65":"Forsikring","66":"Inkasso & kredittjenester",
-    "68":"Eiendomsutvikling & -forvaltning","69":"Juridiske tjenester & advokater",
-    "70":"Ledelseskonsulenter & strategi","71":"Arkitekter & rådgivende ingeniører",
-    "72":"Forskning & FoU","73":"Reklame & mediebyråer","74":"Film, foto & video",
-    "75":"Veterinær & dyreklinikk","77":"Eiendomsdrift & vedlikehold",
-    "78":"HR, rekruttering & bemanning","79":"Reise & turisme",
-    "80":"Vakt & sikkerhet","81":"Renhold & vask","82":"Kontortjenester & administrasjon",
-    "84":"Offentlig forvaltning","85":"Utdanning & skole",
-    "86":"Legekontor & spesialisthelsetjeneste","87":"Sykehjem & hjemmetjenester",
-    "88":"Barnevern & sosiale tjenester","90":"Sport, fritid & kultur",
-    "91":"Sport, fritid & kultur","92":"Lotteri & spill","93":"Treningssenter & idrett",
-    "94":"Frivillige organisasjoner & ideell","95":"Reparasjon av forbruksvarer",
-    "96":"Frisør, skjønnhet & velvære","97":"Andre personlige tjenester",
-    "98":"Andre personlige tjenester","99":"Andre personlige tjenester",
-}
-
-def get_nace_kategori(kode):
-    if not kode:
-        return "Ukjent"
-    return NACE_KATEGORIER.get(kode[:2], "Annet")
 
 def get_fylke(kommunenummer):
     if not kommunenummer:
@@ -105,7 +66,6 @@ def main():
     ts = datetime.now().isoformat()
     alle = last_ned_alle()
 
-    # ENK lagres ikke — hentes live i appen
     segmenter = {
         "SMB":  {"form": ["AS","ANS","DA","NUF"], "fra": 1,   "til": 49},
         "MID":  {"form": ["AS","ANS","NUF"],      "fra": 50,  "til": 200},

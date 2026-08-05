@@ -64,6 +64,7 @@ export const BRANSJE_GRUPPER: BransjeGruppe[] = [
     kategorier: [
       "Regnskap & bokføring",
       "Revisjon",
+      "Regnskap & bokføring",
       "Juridiske tjenester & advokater",
       "Finans, bank & investering",
       "Forsikring",
