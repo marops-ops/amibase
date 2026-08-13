@@ -30,7 +30,7 @@ export default function Home() {
   const [segments, setSegments] = useState<Record<SegmentKey, SegmentState>>({
     ENK: { ...EMPTY }, SMB: { ...EMPTY }, MID: { ...EMPTY }, STOR: { ...EMPTY },
   });
-  const [aktiveSegmenter, setAktiveSegmenter] = useState<Set<SegmentKey>>(new Set(["SMB"]));
+  const [aktiveSegmenter, setAktiveSegmenter] = useState<Set<SegmentKey>>(new Set(["ENK", "SMB", "MID", "STOR"]));
   const [activeTab, setActiveTab] = useState<"liste" | "region" | "lonnsomhet">("liste");
   const [search, setSearch] = useState("");
   const [fylkeFilter, setFylkeFilter] = useState("");
