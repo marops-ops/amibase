@@ -128,7 +128,7 @@ export default function Home() {
       const matchL = !e.regnskap?.lonnsomhet || lonnsomhetFilter.has(e.regnskap.lonnsomhet as any);
       return matchQ && matchF && matchK && matchL;
     });
-  }, [kombinertData, search, fylkeFilter, valgteBransjer]);
+  }, [kombinertData, search, fylkeFilter, valgteBransjer, lonnsomhetFilter]);
 
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const allFylker = useMemo(() => [...new Set(Object.values(FYLKER))].sort(), []);
