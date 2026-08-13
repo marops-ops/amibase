@@ -27,48 +27,35 @@ function fmt(n: number) {
   return (n / 1000).toLocaleString("nb-NO", { maximumFractionDigits: 0 }) + " k";
 }
 
-function pct(n: number) {
-  return n.toLocaleString("nb-NO", { maximumFractionDigits: 1 }) + " %";
+function lonnsomhetLabel(v: number) {
+  if (v > 20) return { label: "Meget god", color: "#059669" };
+  if (v > 10) return { label: "God", color: "#059669" };
+  if (v > 0)  return { label: "Ok", color: "#d97706" };
+  return { label: "Lav", color: "#dc2626" };
 }
 
+function soliditetLabel(v: number) {
+  if (v > 40) return { label: "Meget god", color: "#059669" };
+  if (v > 25) return { label: "God", color: "#059669" };
+  if (v > 10) return { label: "Tilfredsstillende", color: "#d97706" };
+  return { label: "Svak", color: "#dc2626" };
+}
 
-function Gauge({ value, max, label, color, description, theme }: {
-  value: number; max: number; label: string; color: string; description: string; theme: any;
+function likviditetLabel(v: number) {
+  if (v > 200) return { label: "Meget god", color: "#059669" };
+  if (v > 150) return { label: "God", color: "#059669" };
+  if (v > 100) return { label: "Tilfredsstillende", color: "#d97706" };
+  return { label: "Svak", color: "#dc2626" };
+}
+
+function Gauge({ value, label, color, description, theme }: {
+  value: number; label: string; color: string; description: string; theme: any;
 }) {
-  const W = 160, H = 90;
-  const cx = W / 2, cy = H - 10, r = 60;
-
-  function arcPoint(angleDeg: number) {
-    const rad = (angleDeg * Math.PI) / 180;
-    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
-  }
-
-  function arc(startDeg: number, endDeg: number) {
-    const s = arcPoint(startDeg);
-    const e = arcPoint(endDeg);
-    const large = endDeg - startDeg > 180 ? 1 : 0;
-    return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`;
-  }
-
-  // Halvsirkel fra 180° (venstre) til 0° (høyre)
-  // Rød: 180→120, Gul: 120→60, Grønn: 60→0
-  const clamped = Math.max(0, Math.min(max, value));
-  const normalized = clamped / max; // 0 til 1
-  const needleDeg = 180 - normalized * 180; // 180=venstre, 0=høyre
-  const needle = arcPoint(needleDeg);
-
   return (
-    <div style={{ flex: 1, textAlign: "center", padding: "0 8px" }}>
-      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-        <path d={arc(180, 120)} fill="none" stroke="#dc2626" strokeWidth="14" strokeLinecap="butt" />
-        <path d={arc(120, 60)}  fill="none" stroke="#d97706" strokeWidth="14" strokeLinecap="butt" />
-        <path d={arc(60, 0)}    fill="none" stroke="#059669" strokeWidth="14" strokeLinecap="butt" />
-        <line x1={cx} y1={cy} x2={needle.x} y2={needle.y} stroke={color} strokeWidth="3" strokeLinecap="round" />
-        <circle cx={cx} cy={cy} r="5" fill={color} />
-      </svg>
-      <div style={{ fontSize: 11, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 24, fontWeight: 700, color }}>{pct(value)}</div>
-      <div style={{ fontSize: 13, color, fontWeight: 600, marginTop: 2 }}>{description}</div>
+    <div style={{ flex: 1, textAlign: "center", padding: "0 16px" }}>
+      <div style={{ fontSize: 11, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>{label}</div>
+      <div style={{ fontSize: 28, fontWeight: 700, color }}>{value.toLocaleString("nb-NO", { maximumFractionDigits: 1 })} %</div>
+      <div style={{ fontSize: 13, color, fontWeight: 600, marginTop: 4 }}>{description}</div>
     </div>
   );
 }
@@ -197,7 +184,7 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
 
         {!loading && siste && (
           <>
-            {/* Regnskap scorecards */}
+            {/* Regnskap */}
             <div style={{ marginBottom: 24 }}>
               <p style={{ fontSize: 12, fontWeight: 600, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
                 Regnskap {siste.aar}
@@ -217,7 +204,7 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
               </div>
             </div>
 
-            {/* Graf — full bredde */}
+            {/* Graf */}
             {grafData.length > 0 && (
               <div style={{ marginBottom: 24 }}>
                 <p style={{ fontSize: 12, fontWeight: 600, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
@@ -238,17 +225,17 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
               </div>
             )}
 
-            {/* Nøkkeltall — full bredde */}
+            {/* Nøkkeltall */}
             <div>
               <p style={{ fontSize: 12, fontWeight: 600, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
                 Nøkkeltall
               </p>
               <div style={{ backgroundColor: theme.bg, borderRadius: 12, padding: "20px 16px", display: "flex", justifyContent: "space-around" }}>
-                <Gauge value={lPct} max={40} label="Lønnsomhet" color={lL.color} description={lL.label} theme={theme} />
+                <Gauge value={lPct} label="Lønnsomhet" color={lL.color} description={lL.label} theme={theme} />
                 <div style={{ width: 1, backgroundColor: theme.border }} />
-                <Gauge value={sPct} max={60} label="Soliditet" color={sL.color} description={sL.label} theme={theme} />
+                <Gauge value={sPct} label="Soliditet" color={sL.color} description={sL.label} theme={theme} />
                 <div style={{ width: 1, backgroundColor: theme.border }} />
-                <Gauge value={liPct} max={300} label="Likviditet" color={liL.color} description={liL.label} theme={theme} />
+                <Gauge value={liPct} label="Likviditet" color={liL.color} description={liL.label} theme={theme} />
               </div>
             </div>
           </>
