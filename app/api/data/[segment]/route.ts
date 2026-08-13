@@ -26,7 +26,9 @@ export async function GET(
 
   const { searchParams } = new URL(req.url);
   const page = parseInt(searchParams.get("page") ?? "0");
-  const pageSize = 1000;
+
+  // ENK er stor — bruk stor pageSize
+  const pageSize = key === "ENK" ? 10000 : 1000;
   const from = page * pageSize;
   const to = from + pageSize - 1;
 
