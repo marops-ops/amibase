@@ -210,30 +210,10 @@ export default function Home() {
 
         {activeTab === "liste" && (
           <>
-            {/* Søk + fylke + eksport */}
-            <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
-              <div style={{ position: "relative", flex: 1, minWidth: 160 }}>
-                <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: theme.textMuted }}>⌕</span>
-                <input type="text" placeholder="Søk navn, poststed, postnr..." value={search}
-                  onChange={e => { setSearch(e.target.value); }}
-                  style={{ ...s.input, width: "100%", paddingLeft: 32 }} />
-              </div>
-              <select value={fylkeFilter} onChange={e => { setFylkeFilter(e.target.value); }} style={s.input}>
-                <option value="">Alle fylker</option>
-                {allFylker.map(f => <option key={f} value={f}>{f}</option>)}
-              </select>
-              <button onClick={() => downloadCSV(toCSV(filtered), `${date}_utvalg.csv`)}
-                style={{ backgroundColor: "#059669", color: "white", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 14, fontWeight: 500, cursor: "pointer" }}>↓ CSV</button>
-              <button onClick={() => downloadCSV(toCSV(filtered, true), `${date}_utvalg_meta.csv`)}
-                style={{ backgroundColor: "#2563eb", color: "white", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 14, fontWeight: 500, cursor: "pointer" }}>↓ Meta</button>
-              <button onClick={() => downloadCSV(toLinkedInCSV(filtered), `${date}_utvalg_linkedin.csv`)}
-                style={{ backgroundColor: "#0a66c2", color: "white", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 14, fontWeight: 500, cursor: "pointer" }}>↓ LinkedIn</button>
-            </div>
-
             {/* Side om side: bransjefilter + tabell */}
             <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
 
-              {/* Bransjefilter — fast bredde */}
+              {/* Bransjefilter — 30% */}
               {bransjerInitialisert && (
                 <div style={{ flex: "0 0 30%", minWidth: 0 }}>
                   <BransjeFilter
@@ -245,8 +225,26 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Tabell — fyller resten */}
-              <div style={{ flex: "0 0 70%", minWidth: 0 }}>
+              {/* Søk + tabell — 70% */}
+              <div style={{ flex: "0 0 calc(70% - 16px)", minWidth: 0 }}>
+                <div style={{ display: "flex", gap: 12, marginBottom: 12, alignItems: "center" }}>
+                  <div style={{ position: "relative", flex: 1 }}>
+                    <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: theme.textMuted }}>⌕</span>
+                    <input type="text" placeholder="Søk navn, poststed, postnr..." value={search}
+                      onChange={e => { setSearch(e.target.value); }}
+                      style={{ ...s.input, width: "100%", paddingLeft: 32 }} />
+                  </div>
+                  <select value={fylkeFilter} onChange={e => { setFylkeFilter(e.target.value); }} style={s.input}>
+                    <option value="">Alle fylker</option>
+                    {allFylker.map(f => <option key={f} value={f}>{f}</option>)}
+                  </select>
+                  <button onClick={() => downloadCSV(toCSV(filtered), `${date}_utvalg.csv`)}
+                    style={{ backgroundColor: "#059669", color: "white", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 14, fontWeight: 500, cursor: "pointer" }}>↓ CSV</button>
+                  <button onClick={() => downloadCSV(toCSV(filtered, true), `${date}_utvalg_meta.csv`)}
+                    style={{ backgroundColor: "#2563eb", color: "white", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 14, fontWeight: 500, cursor: "pointer" }}>↓ Meta</button>
+                  <button onClick={() => downloadCSV(toLinkedInCSV(filtered), `${date}_utvalg_linkedin.csv`)}
+                    style={{ backgroundColor: "#0a66c2", color: "white", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 14, fontWeight: 500, cursor: "pointer" }}>↓ LinkedIn</button>
+                </div>
                 <div style={{
                   backgroundColor: theme.card,
                   border: `1px solid ${theme.border}`,
