@@ -48,7 +48,13 @@ export default function Home() {
     setSegments(prev => ({ ...prev, [key]: { ...prev[key], state: "loading" } }));
     try {
       let alle: Enhet[] = [];
+      let faktiskAntall = 0;
       if (key === "ENK") {
+        // Hent ekte antall fra meta
+        try {
+          const meta = await fetch("/data/enk/meta.json").then(r => r.json());
+          faktiskAntall = meta.antall ?? 0;
+        } catch {}
         const fylker = ["03","11","15","18","21","31","32","33","34","39","40","42","46","50","55","56"];
         const MAKS = 50000;
         for (const f of fylker) {
@@ -60,6 +66,11 @@ export default function Home() {
           } catch {}
         }
         alle = alle.slice(0, MAKS);
+        setSegments(prev => ({
+          ...prev,
+          ENK: { data: alle, state: "done", antall: faktiskAntall, oppdatert: "" }
+        }));
+        return;
       } else {
         const res = await fetch(`/api/data/${key}`);
         const json = await res.json();
