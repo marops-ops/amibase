@@ -7,6 +7,7 @@ import { Enhet, SegmentKey } from "@/lib/types";
 import EnhetModal from "@/components/EnhetModal";
 import RegionList from "@/components/RegionList";
 import BransjeFilter from "@/components/BransjeFilter";
+import { BRANSJE_GRUPPER } from "@/lib/bransjer";
 
 type LoadState = "idle" | "loading" | "done" | "error";
 
@@ -47,7 +48,7 @@ export default function Home() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [valgtEnhet, setValgtEnhet] = useState<Enhet | null>(null);
-  const [tilgjengeligeKategorier, setTilgjengeligeKategorier] = useState<Set<string>>(new Set());
+
 
   const PAGE_SIZE = 100;
 
@@ -55,13 +56,6 @@ export default function Home() {
     if (darkMode) document.documentElement.classList.add("dark");
     else document.documentElement.classList.remove("dark");
   }, [darkMode]);
-
-  // Hent kategorier
-  useEffect(() => {
-    fetch("/api/kategorier")
-      .then(r => r.json())
-      .then(d => setTilgjengeligeKategorier(new Set(d.kategorier ?? [])));
-  }, []);
 
   // Hent antall per segment
   useEffect(() => {
@@ -233,7 +227,7 @@ export default function Home() {
 
         {/* Bransjefilter */}
         <BransjeFilter
-          tilgjengelige={tilgjengeligeKategorier}
+          tilgjengelige={new Set(BRANSJE_GRUPPER.flatMap(g => g.kategorier))}
           valgte={valgteBransjer}
           onChange={next => {
             setValgteBransjer(next);
