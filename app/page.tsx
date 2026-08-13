@@ -136,7 +136,7 @@ export default function Home() {
 
   return (
     <main style={{ backgroundColor: theme.bg, color: theme.text, minHeight: "100vh" }}>
-      <div style={{ padding: "32px 48px" }}>
+      <div style={{ padding: "32px 10%" }}>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
@@ -215,7 +215,7 @@ export default function Home() {
 
               {/* Bransjefilter — 30% */}
               {bransjerInitialisert && (
-                <div style={{ flex: "0 0 30%", minWidth: 0 }}>
+                <div style={{ flex: "0 0 30%", minWidth: 0, overflowY: "auto" }}>
                   <BransjeFilter
                     tilgjengelige={tilgjengeligeBransjer}
                     valgte={valgteBransjer}
