@@ -44,6 +44,16 @@ export default function Home() {
   }, [darkMode]);
 
   const loadSegment = useCallback(async (key: SegmentKey) => {
+    const cacheKey = `amibase_${key}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      setSegments(prev => ({
+        ...prev,
+        [key]: { data: parsed.data, state: "done", antall: parsed.data.length, oppdatert: parsed.oppdatert },
+      }));
+      return;
+    }
     setSegments(prev => ({ ...prev, [key]: { ...prev[key], state: "loading" } }));
     try {
       const alle: Enhet[] = [];
@@ -55,9 +65,11 @@ export default function Home() {
         if (p + 1 >= (json.totalPages ?? 1)) break;
         p++;
       }
+      const oppdatert = new Date().toISOString();
+      sessionStorage.setItem(cacheKey, JSON.stringify({ data: alle, oppdatert }));
       setSegments(prev => ({
         ...prev,
-        [key]: { data: alle, state: "done", antall: alle.length, oppdatert: new Date().toISOString() },
+        [key]: { data: alle, state: "done", antall: alle.length, oppdatert },
       }));
     } catch {
       setSegments(prev => ({ ...prev, [key]: { ...prev[key], state: "error" } }));
