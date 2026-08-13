@@ -59,11 +59,11 @@ export default function Home() {
     try {
       let alle: Enhet[] = [];
       if (key === "ENK") {
-        const [sor, nord] = await Promise.all([
-          fetch("/data/ENK_SOR.json").then(r => r.json()),
-          fetch("/data/ENK_NORD.json").then(r => r.json()),
-        ]);
-        alle = [...(sor.enheter ?? []), ...(nord.enheter ?? [])];
+        const fylker = ["03","11","15","18","31","32","33","34","39","40","42","46","50","55","56","21"];
+        const resultater = await Promise.all(
+          fylker.map(f => fetch(`/data/enk/${f}.json`).then(r => r.json()).catch(() => ({ enheter: [] })))
+        );
+        alle = resultater.flatMap(r => r.enheter ?? []);
       } else {
         const res = await fetch(`/data/${key}.json`);
         const json = await res.json();
