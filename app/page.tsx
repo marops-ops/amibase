@@ -57,14 +57,17 @@ export default function Home() {
     }
     setSegments(prev => ({ ...prev, [key]: { ...prev[key], state: "loading" } }));
     try {
-      const alle: Enhet[] = [];
-      let p = 0;
-      while (true) {
-        const res = await fetch(`/api/data/${key}?page=${p}`);
+      let alle: Enhet[] = [];
+      if (key === "ENK") {
+        const [sor, nord] = await Promise.all([
+          fetch("/data/ENK_SOR.json").then(r => r.json()),
+          fetch("/data/ENK_NORD.json").then(r => r.json()),
+        ]);
+        alle = [...(sor.enheter ?? []), ...(nord.enheter ?? [])];
+      } else {
+        const res = await fetch(`/data/${key}.json`);
         const json = await res.json();
-        alle.push(...(json.enheter ?? []));
-        if (p + 1 >= (json.totalPages ?? 1)) break;
-        p++;
+        alle = json.enheter ?? [];
       }
       const oppdatert = new Date().toISOString();
       sessionStorage.setItem(cacheKey, JSON.stringify({ data: alle, oppdatert }));
