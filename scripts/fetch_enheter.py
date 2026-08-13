@@ -6,11 +6,15 @@ import io
 import gzip
 import sys
 from datetime import datetime
+from supabase import create_client
 
 sys.path.insert(0, os.path.dirname(__file__))
 from nace_kategorier import get_nace_kategori
 
 LASTNED_URL = "https://data.brreg.no/enhetsregisteret/api/enheter/lastned/csv"
+
+SUPABASE_URL = os.environ["SUPABASE_URL"]
+SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
 
 FYLKENAVN = {
     "03":"Oslo","11":"Rogaland","15":"Møre og Romsdal","18":"Nordland",
@@ -50,7 +54,7 @@ def parse_enhet(e):
         "orgnr": e.get("organisasjonsnummer", ""),
         "navn": e.get("navn", ""),
         "form": e.get("organisasjonsform.kode", ""),
-        "ansatte": ansatte if ansatte is not None else "",
+        "ansatte": ansatte,
         "adresse": e.get("forretningsadresse.adresse", ""),
         "postnummer": e.get("forretningsadresse.postnummer", ""),
         "poststed": e.get("forretningsadresse.poststed", ""),
@@ -59,20 +63,27 @@ def parse_enhet(e):
         "nace": nace_kode,
         "kategori": get_nace_kategori(nace_kode),
         "regnskap": None,
+        "oppdatert": datetime.now().isoformat(),
     }
 
+def upsert_batch(supabase, batch):
+    try:
+        supabase.table("enheter").upsert(batch, on_conflict="orgnr").execute()
+    except Exception as e:
+        print(f"  ⚠ Feil ved upsert: {e}")
+
 def main():
-    os.makedirs("data", exist_ok=True)
-    ts = datetime.now().isoformat()
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
     alle = last_ned_alle()
 
     segmenter = {
+        "ENK":  {"form": ["ENK"],                "fra": None, "til": None},
         "SMB":  {"form": ["AS","ANS","DA","NUF"], "fra": 1,   "til": 49},
         "MID":  {"form": ["AS","ANS","NUF"],      "fra": 50,  "til": 200},
         "STOR": {"form": ["AS","ANS","NUF"],      "fra": 201, "til": None},
     }
 
-    print("\nSegmenterer...")
+    print("\nSegmenterer og laster til Supabase...")
     for key, cfg in segmenter.items():
         resultat = []
         for e in alle:
@@ -94,11 +105,14 @@ def main():
                 continue
             resultat.append(parse_enhet(e))
 
-        out = {"oppdatert": ts, "antall": len(resultat), "enheter": resultat}
-        path = f"data/{key}.json"
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
-        print(f"  ✓ {key}: {len(resultat):,} → {path}")
+        print(f"\n▶ {key}: {len(resultat):,} enheter → Supabase...")
+        batch_size = 500
+        for i in range(0, len(resultat), batch_size):
+            batch = resultat[i:i+batch_size]
+            upsert_batch(supabase, batch)
+            if i % 10000 == 0:
+                print(f"  {i:,}/{len(resultat):,}...", flush=True)
+        print(f"  ✓ {key} ferdig")
 
     print("\n✓ Ferdig!")
 
