@@ -55,25 +55,35 @@ function likviditetLabel(v: number) {
 function Gauge({ value, max, label, color, description, theme }: {
   value: number; max: number; label: string; color: string; description: string; theme: any;
 }) {
-  // Normaliser 0-max til 0-180 grader
+  const W = 160, H = 90;
+  const cx = W / 2, cy = H - 10, r = 60;
+
+  function arcPoint(angleDeg: number) {
+    const rad = (angleDeg * Math.PI) / 180;
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  }
+
+  function arc(startDeg: number, endDeg: number) {
+    const s = arcPoint(startDeg);
+    const e = arcPoint(endDeg);
+    const large = endDeg - startDeg > 180 ? 1 : 0;
+    return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} 1 ${e.x} ${e.y}`;
+  }
+
+  // Halvsirkel fra 180° (venstre) til 0° (høyre)
+  // Rød: 180→120, Gul: 120→60, Grønn: 60→0
   const clamped = Math.max(0, Math.min(max, value));
-  const angleDeg = -180 + (clamped / max) * 180;
-  const rad = (angleDeg * Math.PI) / 180;
-  const cx = 80, cy = 70, r = 55;
-  const px = cx + r * Math.cos(rad);
-  const py = cy + r * Math.sin(rad);
+  const normalized = clamped / max; // 0 til 1
+  const needleDeg = 180 - normalized * 180; // 180=venstre, 0=høyre
+  const needle = arcPoint(needleDeg);
 
   return (
     <div style={{ flex: 1, textAlign: "center", padding: "0 8px" }}>
-      <svg width="160" height="85" viewBox="0 0 160 85">
-        {/* Rødt segment */}
-        <path d="M 25 70 A 55 55 0 0 1 62 19" fill="none" stroke="#dc2626" strokeWidth="12" strokeLinecap="butt" />
-        {/* Gult segment */}
-        <path d="M 62 19 A 55 55 0 0 1 118 19" fill="none" stroke="#d97706" strokeWidth="12" strokeLinecap="butt" />
-        {/* Grønt segment */}
-        <path d="M 118 19 A 55 55 0 0 1 135 70" fill="none" stroke="#059669" strokeWidth="12" strokeLinecap="butt" />
-        {/* Pil */}
-        <line x1={cx} y1={cy} x2={px} y2={py} stroke={color} strokeWidth="3" strokeLinecap="round" />
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
+        <path d={arc(180, 120)} fill="none" stroke="#dc2626" strokeWidth="14" strokeLinecap="butt" />
+        <path d={arc(120, 60)}  fill="none" stroke="#d97706" strokeWidth="14" strokeLinecap="butt" />
+        <path d={arc(60, 0)}    fill="none" stroke="#059669" strokeWidth="14" strokeLinecap="butt" />
+        <line x1={cx} y1={cy} x2={needle.x} y2={needle.y} stroke={color} strokeWidth="3" strokeLinecap="round" />
         <circle cx={cx} cy={cy} r="5" fill={color} />
       </svg>
       <div style={{ fontSize: 11, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>{label}</div>
