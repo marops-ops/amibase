@@ -50,10 +50,17 @@ export default function Home() {
       let alle: Enhet[] = [];
       if (key === "ENK") {
         const fylker = ["03","11","15","18","21","31","32","33","34","39","40","42","46","50","55","56"];
-        const resultater = await Promise.all(
-          fylker.map(f => fetch(`/data/enk/${f}.json`).then(r => r.json()).catch(() => ({ enheter: [] })))
-        );
-        alle = resultater.flatMap(r => r.enheter ?? []);
+        for (const f of fylker) {
+          try {
+            const r = await fetch(`/data/enk/${f}.json`);
+            const d = await r.json();
+            alle = [...alle, ...(d.enheter ?? [])];
+            setSegments(prev => ({
+              ...prev,
+              ENK: { data: alle, state: "loading", antall: alle.length, oppdatert: "" }
+            }));
+          } catch {}
+        }
       } else {
         const res = await fetch(`/api/data/${key}`);
         const json = await res.json();
