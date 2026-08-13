@@ -223,7 +223,7 @@ export default function Home() {
 
               {/* Bransjefilter — fast bredde */}
               {bransjerInitialisert && (
-                <div style={{ width: 320, flexShrink: 0 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <BransjeFilter
                     tilgjengelige={tilgjengeligeBransjer}
                     valgte={valgteBransjer}
