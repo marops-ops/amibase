@@ -55,6 +55,76 @@ function likviditetLabel(v: number) {
 function Gauge({ value, max, label, color, description, theme }: {
   value: number; max: number; label: string; color: string; description: string; theme: any;
 }) {
+  const clamped = Math.max(0, Math.min(max, value));
+  const pct180 = (clamped / max) * 180; // 0 = venstre, 180 = høyre
+  const rotateDeg = -90 + pct180; // -90 = peker venstre, 90 = peker høyre
+
+  return (
+    <div style={{ flex: 1, textAlign: "center", padding: "0 16px" }}>
+      <div style={{ position: "relative", width: 120, height: 70, margin: "0 auto 8px" }}>
+        {/* Halvsirkel bakgrunn */}
+        <svg width="120" height="70" viewBox="0 0 120 70" style={{ position: "absolute", top: 0, left: 0 }}>
+          {/* Rødt 180-120 */}
+          <path d="M 10 60 A 50 50 0 0 1 27 17" fill="none" stroke="#dc2626" strokeWidth="12" />
+          {/* Gult 120-60 */}
+          <path d="M 27 17 A 50 50 0 0 1 93 17" fill="none" stroke="#d97706" strokeWidth="12" />
+          {/* Grønt 60-0 */}
+          <path d="M 93 17 A 50 50 0 0 1 110 60" fill="none" stroke="#059669" strokeWidth="12" />
+        </svg>
+        {/* Pil med CSS rotate */}
+        <div style={{
+          position: "absolute",
+          bottom: 4,
+          left: "50%",
+          width: 2,
+          height: 44,
+          backgroundColor: color,
+          transformOrigin: "bottom center",
+          transform: `translateX(-50%) rotate(${rotateDeg}deg)`,
+          borderRadius: 2,
+        }} />
+        <div style={{
+          position: "absolute",
+          bottom: 0,
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: 10,
+          height: 10,
+          borderRadius: "50%",
+          backgroundColor: color,
+        }} />
+      </div>
+      <div style={{ fontSize: 11, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 24, fontWeight: 700, color }}>{pct(value)}</div>
+      <div style={{ fontSize: 13, color, fontWeight: 600, marginTop: 2 }}>{description}</div>
+    </div>
+  );
+}
+
+function lonnsomhetLabel(v: number) {
+  if (v > 20) return { label: "Meget god", color: "#059669" };
+  if (v > 10) return { label: "God", color: "#059669" };
+  if (v > 0)  return { label: "Ok", color: "#d97706" };
+  return { label: "Lav", color: "#dc2626" };
+}
+
+function soliditetLabel(v: number) {
+  if (v > 40) return { label: "Meget god", color: "#059669" };
+  if (v > 25) return { label: "God", color: "#059669" };
+  if (v > 10) return { label: "Tilfredsstillende", color: "#d97706" };
+  return { label: "Svak", color: "#dc2626" };
+}
+
+function likviditetLabel(v: number) {
+  if (v > 200) return { label: "Meget god", color: "#059669" };
+  if (v > 150) return { label: "God", color: "#059669" };
+  if (v > 100) return { label: "Tilfredsstillende", color: "#d97706" };
+  return { label: "Svak", color: "#dc2626" };
+}
+
+function Gauge({ value, max, label, color, description, theme }: {
+  value: number; max: number; label: string; color: string; description: string; theme: any;
+}) {
   const W = 160, H = 90;
   const cx = W / 2, cy = H - 10, r = 60;
 
