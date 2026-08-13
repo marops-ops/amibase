@@ -159,16 +159,16 @@ export default function Home() {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
           {[
             { label: "Totalt", val: totalCount, sub: "aktive enheter" },
-            { label: "ENK", val: segments.ENK.data.length, sub: "enkeltmannsforetak" },
-            { label: "Mellomstore", val: segments.SMB.data.length, sub: "1–49 ansatte" },
-            { label: "Store", val: segments.MID.data.length + segments.STOR.data.length, sub: "50+ ansatte" },
+            { label: "Enkeltmannsforetak", val: segments.ENK.data.length, sub: "ENK" },
+            { label: "Mellomstore bedrifter", val: segments.SMB.data.length, sub: "AS/ANS — 1–49 ansatte" },
+            { label: "Store bedrifter", val: segments.MID.data.length + segments.STOR.data.length, sub: "AS/ANS — 50+ ansatte" },
           ].map(m => (
-            <div key={m.label} style={s.card}>
-              <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 4 }}>{m.label}</div>
-              <div style={{ fontSize: 24, fontWeight: 500, color: theme.text }}>
+            <div key={m.label} style={{ ...s.card, padding: "1.25rem 1.5rem" }}>
+              <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 6 }}>{m.label}</div>
+              <div style={{ fontSize: 32, fontWeight: 600, color: theme.text, lineHeight: 1.1 }}>
                 {segments.SMB.state === "loading" ? "…" : m.val.toLocaleString("nb-NO")}
               </div>
-              <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 2 }}>{m.sub}</div>
+              <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 4 }}>{m.sub}</div>
             </div>
           ))}
         </div>
