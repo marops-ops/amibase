@@ -10,6 +10,7 @@ export interface Enhet {
   fylkekode: string;
   nace: string;
   kategori: string;
+  regnskap?: { lonnsomhet?: string; inntekter?: number; driftsresultat?: number; aarsresultat?: number; aar?: string; } | null;
 }
 
 export type SegmentKey = "ENK" | "SMB" | "MID" | "STOR";
