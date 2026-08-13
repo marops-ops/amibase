@@ -48,14 +48,41 @@ function likviditetLabel(v: number) {
   return { label: "Svak", color: "#dc2626" };
 }
 
-function Gauge({ value, label, color, description, theme }: {
-  value: number; label: string; color: string; description: string; theme: any;
+function Gauge({ value, min, max, label, color, description, theme }: {
+  value: number; min: number; max: number; label: string; color: string; description: string; theme: any;
 }) {
+  const W = 140, H = 80;
+  const cx = W / 2, cy = H - 5, r = 55, sw = 14;
+
+  // Arc helper: fra startGrad til endGrad (0=høyre, 180=venstre i standard math)
+  // Vi vil ha halvmåne: venstre=180° til høyre=0°
+  function pt(deg: number) {
+    const rad = (deg * Math.PI) / 180;
+    return { x: cx + r * Math.cos(rad), y: cy - r * Math.sin(rad) };
+  }
+  function arc(d1: number, d2: number) {
+    const a = pt(d1), b = pt(d2);
+    return `M ${a.x} ${a.y} A ${r} ${r} 0 0 0 ${b.x} ${b.y}`;
+  }
+
+  // Rød 0°–60°, Gul 60°–120°, Grønn 120°–180°
+  const clamped = Math.max(min, Math.min(max, value));
+  const normalized = (clamped - min) / (max - min);
+  const needleDeg = normalized * 180; // 0=venstre(rød), 180=høyre(grønn)
+  const needle = pt(needleDeg);
+
   return (
-    <div style={{ flex: 1, textAlign: "center", padding: "0 16px" }}>
-      <div style={{ fontSize: 11, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 700, color }}>{value.toLocaleString("nb-NO", { maximumFractionDigits: 1 })} %</div>
-      <div style={{ fontSize: 13, color, fontWeight: 600, marginTop: 4 }}>{description}</div>
+    <div style={{ flex: 1, textAlign: "center" }}>
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block", margin: "0 auto" }}>
+        <path d={arc(0, 60)}   fill="none" stroke="#dc2626" strokeWidth={sw} strokeLinecap="butt" />
+        <path d={arc(60, 120)} fill="none" stroke="#d97706" strokeWidth={sw} strokeLinecap="butt" />
+        <path d={arc(120, 180)} fill="none" stroke="#059669" strokeWidth={sw} strokeLinecap="butt" />
+        <line x1={cx} y1={cy} x2={needle.x} y2={needle.y} stroke={color} strokeWidth="3" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r="5" fill={color} />
+      </svg>
+      <div style={{ fontSize: 11, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 26, fontWeight: 700, color, marginBottom: 2 }}>{value.toLocaleString("nb-NO", { maximumFractionDigits: 1 })} %</div>
+      <div style={{ fontSize: 13, color, fontWeight: 600 }}>{description}</div>
     </div>
   );
 }
@@ -231,11 +258,11 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
                 Nøkkeltall
               </p>
               <div style={{ backgroundColor: theme.bg, borderRadius: 12, padding: "20px 16px", display: "flex", justifyContent: "space-around" }}>
-                <Gauge value={lPct} label="Lønnsomhet" color={lL.color} description={lL.label} theme={theme} />
+                <Gauge value={lPct} min={-20} max={30} label="Lønnsomhet" color={lL.color} description={lL.label} theme={theme} />
                 <div style={{ width: 1, backgroundColor: theme.border }} />
-                <Gauge value={sPct} label="Soliditet" color={sL.color} description={sL.label} theme={theme} />
+                <Gauge value={sPct} min={0} max={60} label="Soliditet" color={sL.color} description={sL.label} theme={theme} />
                 <div style={{ width: 1, backgroundColor: theme.border }} />
-                <Gauge value={liPct} label="Likviditet" color={liL.color} description={liL.label} theme={theme} />
+                <Gauge value={liPct} min={0} max={300} label="Likviditet" color={liL.color} description={liL.label} theme={theme} />
               </div>
             </div>
           </>
