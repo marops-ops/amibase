@@ -130,7 +130,7 @@ export default function Home() {
 
   return (
     <main style={{ backgroundColor: theme.bg, color: theme.text, minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "40px 24px" }}>
+      <div style={{ maxWidth: "100%", margin: "0 auto", padding: "32px 48px" }}>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
