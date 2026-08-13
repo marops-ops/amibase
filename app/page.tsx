@@ -162,42 +162,51 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Metrics */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
-          {[
-            { label: "Totalt", val: totalCount, sub: "aktive enheter" },
-            { label: "Enkeltmannsforetak", val: segments.ENK.data.length, sub: "ENK" },
-            { label: "Mellomstore bedrifter", val: segments.SMB.data.length, sub: "AS/ANS — 1–49 ansatte" },
-            { label: "Store bedrifter", val: segments.MID.data.length + segments.STOR.data.length, sub: "AS/ANS — 50+ ansatte" },
-          ].map(m => (
-            <div key={m.label} style={{ ...s.card, padding: "1.25rem 1.5rem" }}>
-              <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 6 }}>{m.label}</div>
-              <div style={{ fontSize: 32, fontWeight: 600, color: theme.text, lineHeight: 1.1 }}>
-                {segments.SMB.state === "loading" ? "…" : m.val.toLocaleString("nb-NO")}
-              </div>
-              <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 4 }}>{m.sub}</div>
-            </div>
-          ))}
-        </div>
 
-        {/* Segment cards */}
-        <div style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
-          Velg segment — klikk for å toggle, kombiner flere
-        </div>
+
+        {/* Segment cards — 4 kort: Totalt, ENK, SMB, Store(MID+STOR) */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
-          {SEGMENTS.filter(seg => seg.key !== "MID").map(seg => (
-            <div key={seg.key} onClick={() => toggleSegment(seg.key)} style={{
-              ...s.card, cursor: "pointer",
-              border: aktiveSegmenter.has(seg.key) ? `2px solid #059669` : `1px solid ${theme.border}`,
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: seg.color }} />
-                <div style={{ fontSize: 14, fontWeight: 500, color: theme.text }}>{seg.label}</div>
-              </div>
-              <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 8 }}>{seg.desc}</div>
-              <div style={{ fontSize: 20, fontWeight: 500, color: theme.text }}>
-                {segments[seg.key].state === "loading" ? "…" :
-                 segments[seg.key].state === "done" ? segments[seg.key].data.length.toLocaleString("nb-NO") : "—"}
+          {/* Totalt — ikke klikkbar */}
+          <div style={{ ...s.card, padding: "1.25rem 1.5rem" }}>
+            <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 6 }}>Totalt</div>
+            <div style={{ fontSize: 32, fontWeight: 600, color: theme.text, lineHeight: 1.1 }}>
+              {segments.SMB.state === "loading" ? "…" : totalCount.toLocaleString("nb-NO")}
+            </div>
+            <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 4 }}>aktive enheter</div>
+          </div>
+          {/* ENK */}
+          <div onClick={() => toggleSegment("ENK")} style={{ ...s.card, padding: "1.25rem 1.5rem", cursor: "pointer", border: aktiveSegmenter.has("ENK") ? "2px solid #059669" : `1px solid ${theme.border}` }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#ef9f27" }} />
+              <div style={{ fontSize: 14, fontWeight: 500, color: theme.text }}>Enkeltmannsforetak</div>
+            </div>
+            <div style={{ fontSize: 32, fontWeight: 600, color: theme.text, lineHeight: 1.1 }}>
+              {segments.ENK.state === "loading" ? "…" : segments.ENK.data.length.toLocaleString("nb-NO")}
+            </div>
+            <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 4 }}>ENK</div>
+          </div>
+          {/* SMB */}
+          <div onClick={() => toggleSegment("SMB")} style={{ ...s.card, padding: "1.25rem 1.5rem", cursor: "pointer", border: aktiveSegmenter.has("SMB") ? "2px solid #059669" : `1px solid ${theme.border}` }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#1d9e75" }} />
+              <div style={{ fontSize: 14, fontWeight: 500, color: theme.text }}>Mellomstore bedrifter</div>
+            </div>
+            <div style={{ fontSize: 32, fontWeight: 600, color: theme.text, lineHeight: 1.1 }}>
+              {segments.SMB.state === "loading" ? "…" : segments.SMB.data.length.toLocaleString("nb-NO")}
+            </div>
+            <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 4 }}>AS/ANS — 1–49 ansatte</div>
+          </div>
+          {/* Store = MID + STOR */}
+          <div onClick={() => toggleSegment("STOR")} style={{ ...s.card, padding: "1.25rem 1.5rem", cursor: "pointer", border: aktiveSegmenter.has("STOR") ? "2px solid #059669" : `1px solid ${theme.border}` }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#7f77dd" }} />
+              <div style={{ fontSize: 14, fontWeight: 500, color: theme.text }}>Store bedrifter</div>
+            </div>
+            <div style={{ fontSize: 32, fontWeight: 600, color: theme.text, lineHeight: 1.1 }}>
+              {segments.MID.state === "loading" ? "…" : (segments.MID.data.length + segments.STOR.data.length).toLocaleString("nb-NO")}
+            </div>
+            <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 4 }}>AS/ANS — 50–200+ ansatte</div>
+          </div>
               </div>
               <div style={{ fontSize: 11, color: theme.textMuted }}>aktive enheter</div>
             </div>
