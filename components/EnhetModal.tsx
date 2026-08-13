@@ -31,6 +31,28 @@ function pct(n: number) {
   return n.toLocaleString("nb-NO", { maximumFractionDigits: 1 }) + " %";
 }
 
+
+function lonnsomhetLabel(v: number) {
+  if (v > 20) return { label: "Meget god", color: "#059669" };
+  if (v > 10) return { label: "God", color: "#059669" };
+  if (v > 0)  return { label: "Ok", color: "#d97706" };
+  return { label: "Lav", color: "#dc2626" };
+}
+
+function soliditetLabel(v: number) {
+  if (v > 40) return { label: "Meget god", color: "#059669" };
+  if (v > 25) return { label: "God", color: "#059669" };
+  if (v > 10) return { label: "Tilfredsstillende", color: "#d97706" };
+  return { label: "Svak", color: "#dc2626" };
+}
+
+function likviditetLabel(v: number) {
+  if (v > 200) return { label: "Meget god", color: "#059669" };
+  if (v > 150) return { label: "God", color: "#059669" };
+  if (v > 100) return { label: "Tilfredsstillende", color: "#d97706" };
+  return { label: "Svak", color: "#dc2626" };
+}
+
 function Gauge({ value, max, label, color, description, theme }: {
   value: number; max: number; label: string; color: string; description: string; theme: any;
 }) {
