@@ -211,11 +211,11 @@ export default function Home() {
         {activeTab === "liste" && (
           <>
             {/* Side om side: bransjefilter + tabell */}
-            <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+            <div style={{ display: "flex", gap: 16, alignItems: "stretch" }}>
 
               {/* Bransjefilter — 30% */}
               {bransjerInitialisert && (
-                <div style={{ flex: "0 0 30%", minWidth: 0, overflowY: "auto" }}>
+                <div style={{ flex: "0 0 30%", minWidth: 0, overflow: "auto" }}>
                   <BransjeFilter
                     tilgjengelige={tilgjengeligeBransjer}
                     valgte={valgteBransjer}
