@@ -11,6 +11,7 @@ interface Regnskap {
 }
 
 interface Props {
+  darkMode: boolean;
   enhet: Enhet | null;
   onClose: () => void;
 }
@@ -28,7 +29,10 @@ function fmt(n?: number) {
   return (n / 1000).toLocaleString("nb-NO", { maximumFractionDigits: 0 }) + " k";
 }
 
-export default function EnhetModal({ enhet, onClose }: Props) {
+export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
+  const theme = darkMode
+    ? { bg: "#0a0a0a", card: "#111111", border: "#1f2937", text: "#f3f4f6", textMuted: "#9ca3af" }
+    : { bg: "#F1EFE9", card: "#E8E6DF", border: "#C6C6B7", text: "#31353d", textMuted: "#6b7280" };
   const [regnskap, setRegnskap] = useState<Regnskap[]>([]);
   const [roller, setRoller] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
