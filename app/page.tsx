@@ -60,12 +60,12 @@ export default function Home() {
       let alle: Enhet[] = [];
       if (key === "ENK") {
         const [sor, nord] = await Promise.all([
-          fetch("/data/ENK_SOR.json").then(r => r.json()),
-          fetch("/data/ENK_NORD.json").then(r => r.json()),
+          fetch("https://raw.githubusercontent.com/marops-ops/amibase/main/data/ENK_SOR.json").then(r => r.json()),
+          fetch("https://raw.githubusercontent.com/marops-ops/amibase/main/data/ENK_NORD.json").then(r => r.json()),
         ]);
         alle = [...(sor.enheter ?? []), ...(nord.enheter ?? [])];
       } else {
-        const res = await fetch(`/data/${key}.json`);
+        const res = await fetch(`https://raw.githubusercontent.com/marops-ops/amibase/main/data/${key}.json`);
         const json = await res.json();
         alle = json.enheter ?? [];
       }
