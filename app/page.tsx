@@ -50,17 +50,16 @@ export default function Home() {
       let alle: Enhet[] = [];
       if (key === "ENK") {
         const fylker = ["03","11","15","18","21","31","32","33","34","39","40","42","46","50","55","56"];
+        const MAKS = 50000;
         for (const f of fylker) {
+          if (alle.length >= MAKS) break;
           try {
             const r = await fetch(`/data/enk/${f}.json`);
             const d = await r.json();
             alle = [...alle, ...(d.enheter ?? [])];
-            setSegments(prev => ({
-              ...prev,
-              ENK: { data: alle, state: "loading", antall: alle.length, oppdatert: "" }
-            }));
           } catch {}
         }
+        alle = alle.slice(0, MAKS);
       } else {
         const res = await fetch(`/api/data/${key}`);
         const json = await res.json();
