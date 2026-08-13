@@ -197,18 +197,9 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: 4, borderBottom: `1px solid ${theme.border}`, marginBottom: 20 }}>
-          {([{ key: "liste", label: "Bedriftsliste" }, { key: "region", label: "Per region" }, { key: "lonnsomhet", label: "Lønnsomhet" }] as const).map(tab => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
-              padding: "8px 16px", fontSize: 14, fontWeight: 500, cursor: "pointer",
-              background: "none", border: "none", borderBottom: activeTab === tab.key ? "2px solid #059669" : "2px solid transparent",
-              color: activeTab === tab.key ? "#059669" : theme.textMuted, marginBottom: -1,
-            }}>{tab.label}</button>
-          ))}
-        </div>
+        <div style={{ borderBottom: `1px solid ${theme.border}`, marginBottom: 20 }} />
 
-        {activeTab === "liste" && (
+        {(
           <>
             {/* Side om side: bransjefilter + tabell */}
             <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
@@ -287,8 +278,11 @@ export default function Home() {
           </>
         )}
 
-        {activeTab === "region" && <RegionList enheter={kombinertData} segmentKey={[...aktiveSegmenter].join("+")} theme={theme} />}
-        {activeTab === "lonnsomhet" && <LonnsomhetTab enheter={filtered} theme={theme} />}
+        <div style={{ marginTop: 32 }}>
+          <div style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 16 }}>Per region</div>
+          <RegionList enheter={kombinertData} segmentKey={[...aktiveSegmenter].join("+")} theme={theme} />
+        </div>
+
       </div>
 
       <EnhetModal enhet={valgtEnhet} onClose={() => setValgtEnhet(null)} />
