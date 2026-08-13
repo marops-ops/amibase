@@ -207,10 +207,6 @@ export default function Home() {
             </div>
             <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 4 }}>AS/ANS — 50–200+ ansatte</div>
           </div>
-              </div>
-              <div style={{ fontSize: 11, color: theme.textMuted }}>aktive enheter</div>
-            </div>
-          ))}
         </div>
 
         <div style={{ borderBottom: `1px solid ${theme.border}`, marginBottom: 20 }} />
