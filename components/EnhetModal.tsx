@@ -156,7 +156,7 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
   const ebitda = siste ? siste.driftsresultat + siste.avskrivninger : 0;
   const lPct = siste?.inntekter ? (siste.driftsresultat / siste.inntekter) * 100 : 0;
   const sPct = siste?.sumEiendeler ? (siste.sumEgenkapital / siste.sumEiendeler) * 100 : 0;
-  const liPct = siste?.kortsiktigGjeld ? (siste.omlopsmidler / siste.kortsiktigGjeld) * 100 : 0;
+  const liPct = (siste?.kortsiktigGjeld && siste.kortsiktigGjeld > 0) ? (siste.omlopsmidler / siste.kortsiktigGjeld) * 100 : 0;
 
   const lL = lonnsomhetLabel(lPct);
   const sL = soliditetLabel(sPct);
