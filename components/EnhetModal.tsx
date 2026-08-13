@@ -31,13 +31,56 @@ function pct(n: number) {
   return n.toLocaleString("nb-NO", { maximumFractionDigits: 1 }) + " %";
 }
 
-function gauge(val: number, label: string, color: string, theme: any) {
+function GaugeMeter({ value, label, color, description, theme }: {
+  value: number; label: string; color: string; description: string; theme: any;
+}) {
+  // Clamp value mellom -100 og 100 for visning
+  const clamped = Math.max(-50, Math.min(150, value));
+  const normalized = (clamped + 50) / 200; // 0 til 1
+  const angle = -90 + normalized * 180; // -90 til 90 grader
+
+  const cx = 60, cy = 55, r = 45;
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const x = cx + r * Math.cos(toRad(angle));
+  const y = cy + r * Math.sin(toRad(angle));
+
   return (
-    <div style={{ textAlign: "center", flex: 1 }}>
-      <div style={{ fontSize: 11, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 22, fontWeight: 700, color }}>{pct(val)}</div>
+    <div style={{ flex: 1, textAlign: "center" }}>
+      <div style={{ fontSize: 11, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>{label}</div>
+      <svg width="120" height="65" viewBox="0 0 120 65">
+        {/* Bakgrunn rødt til grønt */}
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="#dc2626" strokeWidth="10" strokeDasharray="30 200" strokeDashoffset="-0" />
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="#d97706" strokeWidth="10" strokeDasharray="40 200" strokeDashoffset="-30" />
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="#059669" strokeWidth="10" strokeDasharray="70 200" strokeDashoffset="-70" />
+        {/* Pil */}
+        <line x1={cx} y1={cy} x2={x} y2={y} stroke={color} strokeWidth="3" strokeLinecap="round" />
+        <circle cx={cx} cy={cy} r="4" fill={color} />
+      </svg>
+      <div style={{ fontSize: 20, fontWeight: 700, color, marginTop: -8 }}>{pct(value)}</div>
+      <div style={{ fontSize: 12, color, fontWeight: 500, marginTop: 2 }}>{description}</div>
     </div>
   );
+}
+
+function lonnsomhetLabel(pct: number) {
+  if (pct > 20) return { label: "Meget god", color: "#059669" };
+  if (pct > 10) return { label: "God", color: "#059669" };
+  if (pct > 0) return { label: "Ok", color: "#d97706" };
+  return { label: "Lav", color: "#dc2626" };
+}
+
+function soliditetLabel(pct: number) {
+  if (pct > 40) return { label: "Meget god", color: "#059669" };
+  if (pct > 25) return { label: "God", color: "#059669" };
+  if (pct > 10) return { label: "Tilfredsstillende", color: "#d97706" };
+  return { label: "Svak", color: "#dc2626" };
+}
+
+function likviditetLabel(ratio: number) {
+  if (ratio > 200) return { label: "Meget god", color: "#059669" };
+  if (ratio > 150) return { label: "God", color: "#059669" };
+  if (ratio > 100) return { label: "Tilfredsstillende", color: "#d97706" };
+  return { label: "Svak", color: "#dc2626" };
 }
 
 export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
@@ -116,13 +159,13 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
 
   const siste = regnskap[regnskap.length - 1];
   const ebitda = siste ? siste.driftsresultat + siste.avskrivninger : 0;
-  const lonnsomhet = siste?.inntekter ? (siste.driftsresultat / siste.inntekter) * 100 : 0;
-  const soliditet = siste?.sumEiendeler ? (siste.sumEgenkapital / siste.sumEiendeler) * 100 : 0;
-  const likviditet = siste?.kortsiktigGjeld ? (siste.omlopsmidler / siste.kortsiktigGjeld) * 100 : 0;
+  const lonnsomhetPct = siste?.inntekter ? (siste.driftsresultat / siste.inntekter) * 100 : 0;
+  const soliditetPct = siste?.sumEiendeler ? (siste.sumEgenkapital / siste.sumEiendeler) * 100 : 0;
+  const likviditetPct = siste?.kortsiktigGjeld ? (siste.omlopsmidler / siste.kortsiktigGjeld) * 100 : 0;
 
-  const lonnsomhetFarge = lonnsomhet > 10 ? "#059669" : lonnsomhet >= 0 ? "#d97706" : "#dc2626";
-  const soliditetFarge = soliditet > 30 ? "#059669" : soliditet >= 15 ? "#d97706" : "#dc2626";
-  const likviditetFarge = likviditet > 150 ? "#059669" : likviditet >= 100 ? "#d97706" : "#dc2626";
+  const lLabel = lonnsomhetLabel(lonnsomhetPct);
+  const sLabel = soliditetLabel(soliditetPct);
+  const liLabel = likviditetLabel(likviditetPct);
 
   const grafData = regnskap.map(r => ({
     aar: r.aar,
@@ -136,41 +179,49 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
       <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.5)" }} />
       <div style={{
         position: "relative", zIndex: 10, backgroundColor: theme.card, border: `1px solid ${theme.border}`,
-        borderRadius: 20, padding: 28, width: "100%", maxWidth: 640,
-        maxHeight: "90vh", overflowY: "auto",
+        borderRadius: 20, padding: 32, width: "100%", maxWidth: 860,
+        maxHeight: "92vh", overflowY: "auto",
       }} onClick={e => e.stopPropagation()}>
 
-        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: theme.textMuted }}>✕</button>
+        <button onClick={onClose} style={{ position: "absolute", top: 20, right: 20, background: "none", border: "none", fontSize: 22, cursor: "pointer", color: theme.textMuted }}>✕</button>
 
         {/* Header */}
-        <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: theme.text, marginBottom: 4 }}>{enhet.navn}</h2>
-          <p style={{ fontSize: 13, color: theme.textMuted }}>{enhet.orgnr} · {enhet.form} · {enhet.kategori}</p>
-          <p style={{ fontSize: 13, color: theme.textMuted }}>{enhet.adresse}, {enhet.postnummer} {enhet.poststed}</p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 700, color: theme.text, marginBottom: 4 }}>{enhet.navn}</h2>
+            <p style={{ fontSize: 13, color: theme.textMuted }}>{enhet.orgnr} · {enhet.form} · {enhet.kategori}</p>
+            <p style={{ fontSize: 13, color: theme.textMuted }}>{enhet.adresse}, {enhet.postnummer} {enhet.poststed}</p>
+          </div>
+          {siste && (
+            <div style={{ backgroundColor: lLabel.color + "22", border: `1px solid ${lLabel.color}`, borderRadius: 20, padding: "6px 14px", fontSize: 13, fontWeight: 600, color: lLabel.color, whiteSpace: "nowrap" }}>
+              {lLabel.label} lønnsomhet
+            </div>
+          )}
         </div>
 
         {/* Nøkkelinfo */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 24 }}>
           {[
             { label: "Etablert", val: stiftelsesdato ? stiftelsesdato.slice(0, 4) : "—" },
             { label: "Ansatte", val: enhet.ansatte !== "" ? String(enhet.ansatte) : "—" },
             { label: "Daglig leder", val: roller[0] ?? "—" },
+            { label: "Fylke", val: enhet.fylke || "—" },
           ].map(m => (
-            <div key={m.label} style={{ backgroundColor: theme.bg, borderRadius: 10, padding: "10px 14px" }}>
+            <div key={m.label} style={{ backgroundColor: theme.bg, borderRadius: 10, padding: "12px 14px" }}>
               <div style={{ fontSize: 11, color: theme.textMuted, marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.05em" }}>{m.label}</div>
               <div style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>{m.val}</div>
             </div>
           ))}
         </div>
 
-        {loading && <p style={{ fontSize: 14, color: theme.textMuted, textAlign: "center", padding: "24px 0" }}>Henter regnskapstall...</p>}
+        {loading && <p style={{ fontSize: 14, color: theme.textMuted, textAlign: "center", padding: "32px 0" }}>Henter regnskapstall...</p>}
 
         {!loading && siste && (
           <>
-            {/* Siste år nøkkeltall */}
-            <div style={{ marginBottom: 16 }}>
-              <p style={{ fontSize: 11, fontWeight: 600, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
-                Regnskap {siste.aar}
+            {/* Regnskap */}
+            <div style={{ marginBottom: 24 }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
+                Regnskap {siste.aar} — beløp i NOK
               </p>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
                 {[
@@ -179,49 +230,54 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
                   { label: "EBITDA", val: fmt(ebitda) },
                   { label: "Årsresultat", val: fmt(siste.aarsresultat) },
                 ].map(m => (
-                  <div key={m.label} style={{ backgroundColor: theme.bg, borderRadius: 10, padding: "10px 14px" }}>
+                  <div key={m.label} style={{ backgroundColor: theme.bg, borderRadius: 10, padding: "12px 14px" }}>
                     <div style={{ fontSize: 11, color: theme.textMuted, marginBottom: 4 }}>{m.label}</div>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>{m.val}</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: theme.text }}>{m.val}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Nøkkeltall */}
-            <div style={{ backgroundColor: theme.bg, borderRadius: 12, padding: "14px 20px", marginBottom: 20, display: "flex", gap: 16 }}>
-              {gauge(lonnsomhet, "Lønnsomhet", lonnsomhetFarge, theme)}
-              <div style={{ width: 1, backgroundColor: theme.border }} />
-              {gauge(soliditet, "Soliditet", soliditetFarge, theme)}
-              <div style={{ width: 1, backgroundColor: theme.border }} />
-              {gauge(likviditet, "Likviditet", likviditetFarge, theme)}
-            </div>
-
-            {/* Graf */}
-            {grafData.length > 1 && (
+            {/* Graf + Nøkkeltall side om side */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 8 }}>
+              {/* Graf */}
               <div>
-                <p style={{ fontSize: 11, fontWeight: 600, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
-                  Utvikling (beløp i 1000 kr)
+                <p style={{ fontSize: 12, fontWeight: 600, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
+                  Utvikling (1 000 kr)
                 </p>
-                <ResponsiveContainer width="100%" height={180}>
-                  <LineChart data={grafData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={theme.border} />
-                    <XAxis dataKey="aar" tick={{ fontSize: 11, fill: theme.textMuted }} />
-                    <YAxis tick={{ fontSize: 11, fill: theme.textMuted }} width={60} />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: theme.card, border: `1px solid ${theme.border}`, borderRadius: 8, fontSize: 12 }}
-                      labelStyle={{ color: theme.text }}
-                    />
-                    <Line type="monotone" dataKey="Inntekter" stroke="#059669" strokeWidth={2} dot={{ r: 3 }} />
-                    <Line type="monotone" dataKey="Driftsresultat" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div style={{ backgroundColor: theme.bg, borderRadius: 12, padding: "16px 8px 8px" }}>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <LineChart data={grafData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={theme.border} />
+                      <XAxis dataKey="aar" tick={{ fontSize: 11, fill: theme.textMuted }} />
+                      <YAxis tick={{ fontSize: 10, fill: theme.textMuted }} width={55} />
+                      <Tooltip contentStyle={{ backgroundColor: theme.card, border: `1px solid ${theme.border}`, borderRadius: 8, fontSize: 12, color: theme.text }} />
+                      <Line type="monotone" dataKey="Inntekter" stroke="#059669" strokeWidth={2.5} dot={{ r: 3, fill: "#059669" }} />
+                      <Line type="monotone" dataKey="Driftsresultat" stroke="#2563eb" strokeWidth={2.5} dot={{ r: 3, fill: "#2563eb" }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
-            )}
+
+              {/* Nøkkeltall */}
+              <div>
+                <p style={{ fontSize: 12, fontWeight: 600, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
+                  Nøkkeltall
+                </p>
+                <div style={{ backgroundColor: theme.bg, borderRadius: 12, padding: "16px 8px", display: "flex", gap: 8, justifyContent: "space-around" }}>
+                  <GaugeMeter value={lonnsomhetPct} label="Lønnsomhet" color={lLabel.color} description={lLabel.label} theme={theme} />
+                  <div style={{ width: 1, backgroundColor: theme.border }} />
+                  <GaugeMeter value={soliditetPct} label="Soliditet" color={sLabel.color} description={sLabel.label} theme={theme} />
+                  <div style={{ width: 1, backgroundColor: theme.border }} />
+                  <GaugeMeter value={likviditetPct} label="Likviditet" color={liLabel.color} description={liLabel.label} theme={theme} />
+                </div>
+              </div>
+            </div>
           </>
         )}
 
         {!loading && !siste && (
-          <p style={{ fontSize: 14, color: theme.textMuted, textAlign: "center", padding: "24px 0" }}>Ingen regnskapstall tilgjengelig</p>
+          <p style={{ fontSize: 14, color: theme.textMuted, textAlign: "center", padding: "32px 0" }}>Ingen regnskapstall tilgjengelig</p>
         )}
       </div>
     </div>
