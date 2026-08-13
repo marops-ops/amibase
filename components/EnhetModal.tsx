@@ -68,15 +68,15 @@ function Gauge({ value, min, max, label, color, description, theme }: {
   // Rød 0°–60°, Gul 60°–120°, Grønn 120°–180°
   const clamped = Math.max(min, Math.min(max, value));
   const normalized = (clamped - min) / (max - min);
-  const needleDeg = normalized * 180; // 0=venstre(rød), 180=høyre(grønn)
+  const needleDeg = (1 - normalized) * 180; // høy verdi=venstre(grønt), lav=høyre(rød)
   const needle = pt(needleDeg);
 
   return (
     <div style={{ flex: 1, textAlign: "center" }}>
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: "block", margin: "0 auto" }}>
-        <path d={arc(0, 60)}   fill="none" stroke="#dc2626" strokeWidth={sw} strokeLinecap="butt" />
+        <path d={arc(0, 60)}   fill="none" stroke="#059669" strokeWidth={sw} strokeLinecap="butt" />
         <path d={arc(60, 120)} fill="none" stroke="#d97706" strokeWidth={sw} strokeLinecap="butt" />
-        <path d={arc(120, 180)} fill="none" stroke="#059669" strokeWidth={sw} strokeLinecap="butt" />
+        <path d={arc(120, 180)} fill="none" stroke="#dc2626" strokeWidth={sw} strokeLinecap="butt" />
         <line x1={cx} y1={cy} x2={needle.x} y2={needle.y} stroke={color} strokeWidth="3" strokeLinecap="round" />
         <circle cx={cx} cy={cy} r="5" fill={color} />
       </svg>
