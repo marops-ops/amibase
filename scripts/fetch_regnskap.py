@@ -41,13 +41,29 @@ def hent_regnskap(orgnr):
     except Exception:
         return None
 
-def main():
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+def get_supabase():
+    return create_client(SUPABASE_URL, SUPABASE_KEY)
 
-    # Hent kun orgnr som mangler regnskap (regnskap is null)
-    # Kun AS/ANS/NUF/DA — ENK har ikke regnskap
+def upsert_med_retry(supabase, orgnr, regnskap, retries=3):
+    for attempt in range(retries):
+        try:
+            supabase.table("enheter")\
+                .update({"regnskap": regnskap})\
+                .eq("orgnr", orgnr)\
+                .execute()
+            return True
+        except Exception as e:
+            if attempt < retries - 1:
+                time.sleep(2)
+                supabase = get_supabase()
+            else:
+                print(f"  ⚠ Gir opp {orgnr}: {e}")
+    return False
+
+def main():
+    supabase = get_supabase()
+
     print("Henter orgnr uten regnskap...")
-    
     alle_orgnr = []
     page = 0
     while True:
@@ -57,10 +73,8 @@ def main():
             .is_("regnskap", "null")\
             .range(page * 1000, (page + 1) * 1000 - 1)\
             .execute()
-        
         batch = [r["orgnr"] for r in (res.data or [])]
         alle_orgnr.extend(batch)
-        
         if len(batch) < 1000:
             break
         page += 1
@@ -74,16 +88,18 @@ def main():
 
     oppdatert = 0
     for i, orgnr in enumerate(alle_orgnr):
+        # Reconnect hver 5000 for å unngå timeout
+        if i > 0 and i % 5000 == 0:
+            supabase = get_supabase()
+            print(f"  ↺ Reconnect til Supabase ved {i:,}...", flush=True)
+
         regnskap = hent_regnskap(orgnr)
         if regnskap:
-            supabase.table("enheter")\
-                .update({"regnskap": regnskap})\
-                .eq("orgnr", orgnr)\
-                .execute()
-            oppdatert += 1
-        
+            if upsert_med_retry(supabase, orgnr, regnskap):
+                oppdatert += 1
+
         time.sleep(0.05)
-        
+
         if i % 1000 == 0:
             print(f"  {i:,}/{total:,} — {oppdatert:,} oppdatert...", flush=True)
 
