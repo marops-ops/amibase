@@ -83,7 +83,14 @@ export default function Home() {
   function toggleSegment(key: SegmentKey) {
     setAktiveSegmenter(prev => {
       const next = new Set(prev);
-      if (next.has(key)) { if (next.size === 1) return next; next.delete(key); } else next.add(key);
+      const keys = key === "STOR" ? ["STOR", "MID"] as SegmentKey[] : [key] as SegmentKey[];
+      const alleAktive = keys.every(k => next.has(k));
+      if (alleAktive) {
+        if (next.size <= keys.length) return next;
+        keys.forEach(k => next.delete(k));
+      } else {
+        keys.forEach(k => next.add(k));
+      }
       setBransjerInitialisert(false);
       return next;
     });
@@ -178,7 +185,7 @@ export default function Home() {
           Velg segment — klikk for å toggle, kombiner flere
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
-          {SEGMENTS.map(seg => (
+          {SEGMENTS.filter(seg => seg.key !== "MID").map(seg => (
             <div key={seg.key} onClick={() => toggleSegment(seg.key)} style={{
               ...s.card, cursor: "pointer",
               border: aktiveSegmenter.has(seg.key) ? `2px solid #059669` : `1px solid ${theme.border}`,

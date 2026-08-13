@@ -32,7 +32,7 @@ export const SEGMENTS: Segment[] = [
   {
     key: "STOR",
     label: "Store bedrifter",
-    desc: "AS/ANS — 200+ ansatte",
+    desc: "AS/ANS — 50–200+ ansatte",
     orgformer: ["AS", "ANS", "NUF"],
     ansatteFra: 201,
     color: "#7f77dd",
