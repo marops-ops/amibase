@@ -70,7 +70,7 @@ export default function Home() {
         alle = json.enheter ?? [];
       }
       const oppdatert = new Date().toISOString();
-      sessionStorage.setItem(cacheKey, JSON.stringify({ data: alle, oppdatert }));
+      try { sessionStorage.setItem(cacheKey, JSON.stringify({ data: alle, oppdatert })); } catch {}
       setSegments(prev => ({
         ...prev,
         [key]: { data: alle, state: "done", antall: alle.length, oppdatert },
