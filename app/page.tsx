@@ -226,7 +226,7 @@ export default function Home() {
               )}
 
               {/* Søk + tabell — 70% */}
-              <div style={{ flex: "0 0 calc(70% - 16px)", minWidth: 0 }}>
+              <div style={{ flex: "0 0 calc(70% - 16px)", minWidth: 0, display: "flex", flexDirection: "column" }}>
                 <div style={{ display: "flex", gap: 12, marginBottom: 12, alignItems: "center" }}>
                   <div style={{ position: "relative", flex: 1 }}>
                     <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: theme.textMuted }}>⌕</span>
