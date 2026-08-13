@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { SEGMENTS, FYLKER } from "@/lib/segments";
 import { toCSV, toLinkedInCSV, downloadCSV } from "@/lib/fetcher";
 import { Enhet, SegmentKey } from "@/lib/types";
@@ -14,10 +14,11 @@ type LoadState = "idle" | "loading" | "done" | "error";
 interface SegmentState {
   data: Enhet[];
   state: LoadState;
+  antall: number;
   oppdatert: string;
 }
 
-const EMPTY: SegmentState = { data: [], state: "idle", oppdatert: "" };
+const EMPTY: SegmentState = { data: [], state: "idle", antall: 0, oppdatert: "" };
 const PAGE_SIZE = 30;
 
 const LIGHT = { bg: "#F1EFE9", card: "#E8E6DF", border: "#C6C6B7", text: "#31353d", textMuted: "#6b7280" };
@@ -44,37 +45,30 @@ export default function Home() {
     else document.documentElement.classList.remove("dark");
   }, [darkMode]);
 
-  useEffect(() => {
-    async function loadSegment(key: SegmentKey) {
-      setSegments(prev => ({ ...prev, [key]: { ...prev[key], state: "loading" } }));
-      try {
-        if (key === "ENK") {
-          // Hent ENK live fra API, paginer gjennom alle sider
-          const alleEnk: Enhet[] = [];
-          let p = 0;
-          while (true) {
-            const res = await fetch(`/api/enk?page=${p}`);
-            const json = await res.json();
-            alleEnk.push(...(json.enheter ?? []));
-            if (p + 1 >= (json.totalPages ?? 1) || p >= 99) break;
-            p++;
-          }
-          setSegments(prev => ({ ...prev, ENK: { data: alleEnk, state: "done", oppdatert: "" } }));
-        } else {
-          const res = await fetch(`/api/data/${key}`);
-          const json = await res.json();
-          setSegments(prev => ({
-            ...prev,
-            [key]: { data: json.enheter ?? [], state: "done", oppdatert: json.oppdatert ?? "" },
-          }));
-        }
-      } catch {
-        setSegments(prev => ({ ...prev, [key]: { ...prev[key], state: "error" } }));
+  const loadSegment = useCallback(async (key: SegmentKey) => {
+    setSegments(prev => ({ ...prev, [key]: { ...prev[key], state: "loading" } }));
+    try {
+      const alle: Enhet[] = [];
+      let p = 0;
+      while (true) {
+        const res = await fetch(`/api/data/${key}?page=${p}`);
+        const json = await res.json();
+        alle.push(...(json.enheter ?? []));
+        if (p + 1 >= (json.totalPages ?? 1)) break;
+        p++;
       }
+      setSegments(prev => ({
+        ...prev,
+        [key]: { data: alle, state: "done", antall: alle.length, oppdatert: new Date().toISOString() },
+      }));
+    } catch {
+      setSegments(prev => ({ ...prev, [key]: { ...prev[key], state: "error" } }));
     }
-
-    for (const seg of SEGMENTS) loadSegment(seg.key);
   }, []);
+
+  useEffect(() => {
+    for (const seg of SEGMENTS) loadSegment(seg.key);
+  }, [loadSegment]);
 
   function toggleSegment(key: SegmentKey) {
     setAktiveSegmenter(prev => {
