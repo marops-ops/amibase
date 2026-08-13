@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { join } from "path";
-import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-const JSON_SEGMENTS = ["SMB", "MID", "STOR", "ENK_SOR", "ENK_NORD"];
+const ENK_FYLKER = ["03","11","15","18","21","31","32","33","34","39","40","42","46","50","55","56"];
 
 export async function GET(
   req: NextRequest,
@@ -16,29 +10,32 @@ export async function GET(
 ) {
   const { segment } = await params;
   const key = segment.toUpperCase();
+  const allowed = ["ENK", "SMB", "MID", "STOR"];
 
-  // ENK kombinerer SOR + NORD fra JSON
-  if (key === "ENK") {
-    try {
-      const sor = JSON.parse(readFileSync(join(process.cwd(), "data", "ENK_SOR.json"), "utf-8"));
-      const nord = JSON.parse(readFileSync(join(process.cwd(), "data", "ENK_NORD.json"), "utf-8"));
-      const alle = [...sor.enheter, ...nord.enheter];
-      return NextResponse.json({ enheter: alle, antall: alle.length, totalPages: 1, oppdatert: sor.oppdatert });
-    } catch {
-      return NextResponse.json({ error: "ENK data ikke tilgjengelig" }, { status: 404 });
-    }
+  if (!allowed.includes(key)) {
+    return NextResponse.json({ error: "Ukjent segment" }, { status: 400 });
   }
 
-  // SMB, MID, STOR fra JSON
-  if (["SMB","MID","STOR"].includes(key)) {
-    try {
-      const path = join(process.cwd(), "data", `${key}.json`);
-      const data = JSON.parse(readFileSync(path, "utf-8"));
-      return NextResponse.json({ enheter: data.enheter, antall: data.antall, totalPages: 1, oppdatert: data.oppdatert });
-    } catch {
-      return NextResponse.json({ error: "Data ikke tilgjengelig" }, { status: 404 });
+  try {
+    if (key === "ENK") {
+      const alle: any[] = [];
+      for (const fylke of ENK_FYLKER) {
+        const path = join(process.cwd(), "public", "data", "enk", `${fylke}.json`);
+        if (existsSync(path)) {
+          const data = JSON.parse(readFileSync(path, "utf-8"));
+          alle.push(...(data.enheter ?? []));
+        }
+      }
+      return NextResponse.json({ enheter: alle, antall: alle.length, totalPages: 1 });
     }
-  }
 
-  return NextResponse.json({ error: "Ukjent segment" }, { status: 400 });
+    const path = join(process.cwd(), "public", "data", `${key}.json`);
+    if (!existsSync(path)) {
+      return NextResponse.json({ error: "Ikke funnet" }, { status: 404 });
+    }
+    const data = JSON.parse(readFileSync(path, "utf-8"));
+    return NextResponse.json({ enheter: data.enheter, antall: data.antall, totalPages: 1 });
+  } catch (e) {
+    return NextResponse.json({ error: String(e) }, { status: 500 });
+  }
 }

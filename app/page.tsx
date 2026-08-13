@@ -58,17 +58,9 @@ export default function Home() {
     setSegments(prev => ({ ...prev, [key]: { ...prev[key], state: "loading" } }));
     try {
       let alle: Enhet[] = [];
-      if (key === "ENK") {
-        const fylker = ["03","11","15","18","31","32","33","34","39","40","42","46","50","55","56","21"];
-        const resultater = await Promise.all(
-          fylker.map(f => fetch(`/data/enk/${f}.json`).then(r => r.json()).catch(() => ({ enheter: [] })))
-        );
-        alle = resultater.flatMap(r => r.enheter ?? []);
-      } else {
-        const res = await fetch(`/data/${key}.json`);
-        const json = await res.json();
-        alle = json.enheter ?? [];
-      }
+      const res = await fetch(`/api/data/${key}`);
+      const json = await res.json();
+      alle = json.enheter ?? [];
       const oppdatert = new Date().toISOString();
       try { sessionStorage.setItem(cacheKey, JSON.stringify({ data: alle, oppdatert })); } catch {}
       setSegments(prev => ({
