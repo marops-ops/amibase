@@ -40,7 +40,14 @@ export async function GET(
   if (search) query = query.ilike("navn", `%${search}%`);
   if (fylke) query = query.eq("fylke", fylke);
   if (kategori) query = query.eq("kategori", kategori);
-  if (lonnsomhet) query = query.eq("regnskap->>lonnsomhet", lonnsomhet);
+  if (lonnsomhet) {
+    const verdier = lonnsomhet.split(",");
+    if (verdier.length === 1) {
+      query = query.eq("regnskap->>lonnsomhet", verdier[0]);
+    } else {
+      query = query.in("regnskap->>lonnsomhet", verdier);
+    }
+  }
 
   if (countOnly) {
     const { count, error } = await query.limit(0);

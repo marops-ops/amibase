@@ -47,6 +47,7 @@ export default function Home() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [valgtEnhet, setValgtEnhet] = useState<Enhet | null>(null);
+  const [tilgjengeligeKategorier, setTilgjengeligeKategorier] = useState<Set<string>>(new Set());
 
   const PAGE_SIZE = 100;
 
@@ -54,6 +55,13 @@ export default function Home() {
     if (darkMode) document.documentElement.classList.add("dark");
     else document.documentElement.classList.remove("dark");
   }, [darkMode]);
+
+  // Hent kategorier
+  useEffect(() => {
+    fetch("/api/kategorier")
+      .then(r => r.json())
+      .then(d => setTilgjengeligeKategorier(new Set(d.kategorier ?? [])));
+  }, []);
 
   // Hent antall per segment
   useEffect(() => {
@@ -84,7 +92,7 @@ export default function Home() {
         });
 
         if (lonnsomhetFilter.size > 0 && lonnsomhetFilter.size < 3) {
-          params.set("lonnsomhet", [...lonnsomhetFilter][0]);
+          params.set("lonnsomhet", [...lonnsomhetFilter].join(","));
         }
 
         const res = await fetch(`/api/data/${seg}?${params}`);
@@ -225,9 +233,12 @@ export default function Home() {
 
         {/* Bransjefilter */}
         <BransjeFilter
-          tilgjengelige={new Set(SEGMENTS.flatMap(s => []))}
+          tilgjengelige={tilgjengeligeKategorier}
           valgte={valgteBransjer}
-          onChange={next => { setValgteBransjer(next); setKategoriFilter(""); }}
+          onChange={next => {
+            setValgteBransjer(next);
+            // Ikke sett kategoriFilter direkte — bransjefilter håndterer det
+          }}
           theme={theme}
         />
 
