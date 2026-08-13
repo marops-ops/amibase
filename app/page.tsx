@@ -37,6 +37,7 @@ export default function Home() {
   const [valgteBransjer, setValgteBransjer] = useState<Set<string>>(new Set());
   const [bransjerInitialisert, setBransjerInitialisert] = useState(false);
   const [valgtEnhet, setValgtEnhet] = useState<Enhet | null>(null);
+  const [lonnsomhetFilter, setLonnsomhetFilter] = useState<Set<"god"|"ok"|"lav">>(new Set(["god","ok","lav"]));
 
   useEffect(() => {
     if (darkMode) document.documentElement.classList.add("dark");
@@ -124,7 +125,8 @@ export default function Home() {
       const matchQ = !q || e.navn.toLowerCase().includes(q) || e.poststed.toLowerCase().includes(q) || e.postnummer.includes(q);
       const matchF = !fylkeFilter || e.fylke === fylkeFilter;
       const matchK = valgteBransjer.size === 0 || valgteBransjer.has(e.kategori);
-      return matchQ && matchF && matchK;
+      const matchL = !e.regnskap?.lonnsomhet || lonnsomhetFilter.has(e.regnskap.lonnsomhet as any);
+      return matchQ && matchF && matchK && matchL;
     });
   }, [kombinertData, search, fylkeFilter, valgteBransjer]);
 
