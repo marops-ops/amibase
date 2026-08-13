@@ -258,11 +258,11 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
                 Nøkkeltall
               </p>
               <div style={{ backgroundColor: theme.bg, borderRadius: 12, padding: "20px 16px", display: "flex", justifyContent: "space-around" }}>
-                <Gauge value={lPct} min={-20} max={30} label="Lønnsomhet" color={lL.color} description={lL.label} theme={theme} />
+                <Gauge value={lPct} min={-20} max={25} label="Lønnsomhet" color={lL.color} description={lL.label} theme={theme} />
                 <div style={{ width: 1, backgroundColor: theme.border }} />
-                <Gauge value={sPct} min={0} max={60} label="Soliditet" color={sL.color} description={sL.label} theme={theme} />
+                <Gauge value={sPct} min={0} max={50} label="Soliditet" color={sL.color} description={sL.label} theme={theme} />
                 <div style={{ width: 1, backgroundColor: theme.border }} />
-                <Gauge value={liPct} min={0} max={300} label="Likviditet" color={liL.color} description={liL.label} theme={theme} />
+                <Gauge value={liPct} min={0} max={250} label="Likviditet" color={liL.color} description={liL.label} theme={theme} />
               </div>
             </div>
           </>
