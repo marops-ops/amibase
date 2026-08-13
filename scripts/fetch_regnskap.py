@@ -1,9 +1,12 @@
 import requests
-import json
 import os
 import time
+from supabase import create_client
 
 REGNSKAP_URL = "https://data.brreg.no/regnskapsregisteret/regnskap/{}"
+
+SUPABASE_URL = os.environ["SUPABASE_URL"]
+SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
 
 def hent_regnskap(orgnr):
     try:
@@ -39,38 +42,52 @@ def hent_regnskap(orgnr):
         return None
 
 def main():
-    segmenter = ["SMB", "MID", "STOR"]
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-    for key in segmenter:
-        path = f"data/{key}.json"
-        if not os.path.exists(path):
-            print(f"  ⚠ {path} ikke funnet, hopper over")
-            continue
+    # Hent kun orgnr som mangler regnskap (regnskap is null)
+    # Kun AS/ANS/NUF/DA — ENK har ikke regnskap
+    print("Henter orgnr uten regnskap...")
+    
+    alle_orgnr = []
+    page = 0
+    while True:
+        res = supabase.table("enheter")\
+            .select("orgnr")\
+            .in_("form", ["AS","ANS","DA","NUF"])\
+            .is_("regnskap", "null")\
+            .range(page * 1000, (page + 1) * 1000 - 1)\
+            .execute()
+        
+        batch = [r["orgnr"] for r in (res.data or [])]
+        alle_orgnr.extend(batch)
+        
+        if len(batch) < 1000:
+            break
+        page += 1
 
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+    total = len(alle_orgnr)
+    print(f"  ✓ {total:,} bedrifter mangler regnskap")
 
-        enheter = data["enheter"]
-        total = len(enheter)
-        print(f"\n▶ {key}: henter regnskap for {total:,} enheter...")
+    if total == 0:
+        print("Ingen nye å hente — alt er oppdatert!")
+        return
 
-        for i, e in enumerate(enheter):
-            if e.get("regnskap"):
-                continue
-            e["regnskap"] = hent_regnskap(e["orgnr"])
-            time.sleep(0.05)
-            if i % 1000 == 0:
-                print(f"  {i:,}/{total:,}...", flush=True)
-                with open(path, "w", encoding="utf-8") as f:
-                    json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+    oppdatert = 0
+    for i, orgnr in enumerate(alle_orgnr):
+        regnskap = hent_regnskap(orgnr)
+        if regnskap:
+            supabase.table("enheter")\
+                .update({"regnskap": regnskap})\
+                .eq("orgnr", orgnr)\
+                .execute()
+            oppdatert += 1
+        
+        time.sleep(0.05)
+        
+        if i % 1000 == 0:
+            print(f"  {i:,}/{total:,} — {oppdatert:,} oppdatert...", flush=True)
 
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
-
-        med = sum(1 for e in enheter if e.get("regnskap"))
-        print(f"  ✓ {med:,} av {total:,} har regnskap")
-
-    print("\n✓ Ferdig!")
+    print(f"\n✓ Ferdig! {oppdatert:,} av {total:,} fikk regnskapstall")
 
 if __name__ == "__main__":
     main()
