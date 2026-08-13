@@ -89,25 +89,25 @@ export default function EnhetModal({ enhet, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50" />
       <div
-        className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg p-6 z-10"
+        style={{ backgroundColor: theme.card, border: `1px solid ${theme.border}`, borderRadius: 16, padding: 24, width: "100%", maxWidth: 520, position: "relative", zIndex: 10 }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">✕</button>
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: theme.textMuted }}>✕</button>
 
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{enhet.navn}</h2>
-          <p className="text-sm text-gray-500">{enhet.orgnr} · {enhet.form} · {enhet.kategori}</p>
-          <p className="text-sm text-gray-500">{enhet.adresse}, {enhet.postnummer} {enhet.poststed}</p>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: theme.text, marginBottom: 4 }}>{enhet.navn}</h2>
+          <p style={{ fontSize: 13, color: theme.textMuted }}>{enhet.orgnr} · {enhet.form} · {enhet.kategori}</p>
+          <p style={{ fontSize: 13, color: theme.textMuted }}>{enhet.adresse}, {enhet.postnummer} {enhet.poststed}</p>
         </div>
 
         {roller.length > 0 && (
-          <div className="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Daglig leder</p>
-            {roller.map((r, i) => <p key={i} className="text-sm font-medium text-gray-900 dark:text-gray-100">{r}</p>)}
+          <div style={{ marginBottom: 16, padding: 12, borderRadius: 10, backgroundColor: theme.bg }}>
+            <p style={{ fontSize: 11, fontWeight: 500, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Daglig leder</p>
+            {roller.map((r, i) => <p key={i} style={{ fontSize: 14, fontWeight: 500, color: theme.text }}>{r}</p>)}
           </div>
         )}
 
-        {loading && <p className="text-sm text-gray-400 text-center py-4">Henter regnskapstall...</p>}
+        {loading && <p style={{ fontSize: 14, color: theme.textMuted, textAlign: "center", padding: "16px 0" }}>Henter regnskapstall...</p>}
 
         {!loading && sisteRegnskap && (
           <div>
@@ -115,16 +115,16 @@ export default function EnhetModal({ enhet, onClose }: Props) {
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Regnskap {sisteRegnskap.aar}</p>
               {lstat && <span className={`text-sm font-medium ${lstat.color}`}>{lstat.label}</span>}
             </div>
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
               {[
                 { label: "Driftsinntekter", val: fmt(sisteRegnskap.sumDriftsinntekter) },
                 { label: "Driftsresultat", val: fmt(sisteRegnskap.driftsresultat) },
                 { label: "Årsresultat", val: fmt(sisteRegnskap.aarsresultat) },
                 { label: "Sum eiendeler", val: fmt(sisteRegnskap.sumEiendeler) },
               ].map((m) => (
-                <div key={m.label} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                  <p className="text-xs text-gray-400 mb-1">{m.label}</p>
-                  <p className="text-base font-medium text-gray-900 dark:text-gray-100">{m.val}</p>
+                <div key={m.label} style={{ backgroundColor: theme.bg, borderRadius: 10, padding: 12 }}>
+                  <p style={{ fontSize: 12, color: theme.textMuted, marginBottom: 4 }}>{m.label}</p>
+                  <p style={{ fontSize: 16, fontWeight: 500, color: theme.text }}>{m.val}</p>
                 </div>
               ))}
             </div>
@@ -146,7 +146,7 @@ export default function EnhetModal({ enhet, onClose }: Props) {
         )}
 
         {!loading && !sisteRegnskap && (
-          <p className="text-sm text-gray-400 text-center py-4">Ingen regnskapstall tilgjengelig</p>
+          <p style={{ fontSize: 14, color: theme.textMuted, textAlign: "center", padding: "16px 0" }}>Ingen regnskapstall tilgjengelig</p>
         )}
       </div>
     </div>

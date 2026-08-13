@@ -291,7 +291,7 @@ export default function Home() {
 
       </div>
 
-      <EnhetModal enhet={valgtEnhet} onClose={() => setValgtEnhet(null)} />
+      <EnhetModal enhet={valgtEnhet} onClose={() => setValgtEnhet(null)} darkMode={darkMode} />
     </main>
   );
 }
