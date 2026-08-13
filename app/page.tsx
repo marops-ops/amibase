@@ -232,7 +232,6 @@ export default function Home() {
             </div>
 
             {/* Tabell */}
-            <div style={{
                 <div style={{
                   backgroundColor: theme.card,
                   border: `1px solid ${theme.border}`,
