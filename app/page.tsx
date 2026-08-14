@@ -41,7 +41,8 @@ export default function Home() {
   const [fylkeFilter, setFylkeFilter] = useState("");
   const [kategoriFilter, setKategoriFilter] = useState("");
   const [lonnsomhetFilter, setLonnsomhetFilter] = useState<Set<string>>(new Set());
-  const [valgteBransjer, setValgteBransjer] = useState<Set<string>>(new Set());
+  const alleKategorier = new Set(BRANSJE_GRUPPER.flatMap(g => g.kategorier));
+  const [valgteBransjer, setValgteBransjer] = useState<Set<string>>(alleKategorier);
 
   const [enheter, setEnheter] = useState<Enhet[]>([]);
   const [totalAntall, setTotalAntall] = useState(0);
