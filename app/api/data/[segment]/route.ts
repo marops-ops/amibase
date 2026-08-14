@@ -28,6 +28,7 @@ export async function GET(
   const fylke = searchParams.get("fylke") ?? "";
   const kategori = searchParams.get("kategori") ?? "";
   const lonnsomhet = searchParams.get("lonnsomhet") ?? "";
+  const visAns = searchParams.get("visAns") === "true";
   const countOnly = searchParams.get("countOnly") === "true";
 
   let query = supabase.from("enheter").select(
@@ -55,6 +56,9 @@ export async function GET(
       query = query.in("regnskap->>lonnsomhet", verdier);
     }
   }
+  if (!visAns) query = query.neq("form", "ANS");
+
+  query = query.order("navn", { ascending: true });
 
   if (countOnly) {
     const { count, error } = await query.limit(0);

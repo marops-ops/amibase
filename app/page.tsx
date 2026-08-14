@@ -40,6 +40,7 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [fylkeFilter, setFylkeFilter] = useState("");
   const [kategoriFilter, setKategoriFilter] = useState("");
+  const [visAns, setVisAns] = useState(false);
   const [lonnsomhetFilter, setLonnsomhetFilter] = useState<Set<string>>(new Set());
   const alleKategorier = new Set(BRANSJE_GRUPPER.flatMap(g => g.kategorier));
   const [valgteBransjer, setValgteBransjer] = useState<Set<string>>(alleKategorier);
@@ -84,6 +85,7 @@ export default function Home() {
           ...(search && { search }),
           ...(fylkeFilter && { fylke: fylkeFilter }),
           ...(kategoriFilter && { kategori: kategoriFilter }),
+          ...(visAns && { visAns: "true" }),
         });
 
         if (lonnsomhetFilter.size > 0 && lonnsomhetFilter.size < 3) {
@@ -100,7 +102,7 @@ export default function Home() {
       setTotalAntall(totalt);
     } catch {}
     setLoading(false);
-  }, [aktiveSegmenter, search, fylkeFilter, kategoriFilter, lonnsomhetFilter]);
+  }, [aktiveSegmenter, search, fylkeFilter, kategoriFilter, lonnsomhetFilter, visAns]);
 
   useEffect(() => {
     setPage(0);
@@ -129,6 +131,7 @@ export default function Home() {
           ...(search && { search }),
           ...(fylkeFilter && { fylke: fylkeFilter }),
           ...(kategoriFilter && { kategori: kategoriFilter }),
+          ...(visAns && { visAns: "true" }),
         });
         const res = await fetch(`/api/data/${seg}?${params}`);
         const json = await res.json();
@@ -249,6 +252,12 @@ export default function Home() {
             <option value="">Alle fylker</option>
             {allFylker.map(f => <option key={f} value={f}>{f}</option>)}
           </select>
+          <label style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13, color: theme.textMuted, fontWeight: 500 }}>
+            <input type="checkbox" checked={visAns}
+              onChange={() => setVisAns(v => !v)}
+              style={{ accentColor: "#6b7280" }} />
+            ANS
+          </label>
           {LONNSOMHET_OPTIONS.map(l => (
             <label key={l.key} style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer", fontSize: 13, color: l.color, fontWeight: 500 }}>
               <input type="checkbox" checked={lonnsomhetFilter.size === 0 || lonnsomhetFilter.has(l.key)}
