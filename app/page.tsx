@@ -232,7 +232,7 @@ export default function Home() {
           valgte={valgteBransjer}
           onChange={next => {
             setValgteBransjer(next);
-            // Ikke sett kategoriFilter direkte — bransjefilter håndterer det
+            setKategoriFilter(next.size === alleKategorier.size ? "" : [...next].join(","));
           }}
           theme={theme}
         />
