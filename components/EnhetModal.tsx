@@ -36,7 +36,7 @@ function lonnsomhetLabel(v: number) {
 
 function soliditetLabel(v: number) {
   if (v > 40) return { label: "Meget god", color: "#059669" };
-  if (v > 25) return { label: "God", color: "#059669" };
+  if (v > 20) return { label: "God", color: "#059669" };
   if (v > 10) return { label: "Tilfredsstillende", color: "#d97706" };
   return { label: "Svak", color: "#dc2626" };
 }
@@ -48,8 +48,8 @@ function likviditetLabel(v: number) {
   return { label: "Svak", color: "#dc2626" };
 }
 
-function Gauge({ value, min, max, label, color, description, theme }: {
-  value: number; min: number; max: number; label: string; color: string; description: string; theme: any;
+function Gauge({ value, min, max, label, color, description, theme, unit = "%", displayValue }: {
+  value: number; min: number; max: number; label: string; color: string; description: string; theme: any; unit?: string; displayValue?: number;
 }) {
   const W = 140, H = 80;
   const cx = W / 2, cy = H - 5, r = 55, sw = 14;
@@ -81,7 +81,7 @@ function Gauge({ value, min, max, label, color, description, theme }: {
         <circle cx={cx} cy={cy} r="5" fill={color} />
       </svg>
       <div style={{ fontSize: 11, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 26, fontWeight: 700, color, marginBottom: 2 }}>{value.toLocaleString("nb-NO", { maximumFractionDigits: 1 })} %</div>
+      <div style={{ fontSize: 26, fontWeight: 700, color, marginBottom: 2 }}>{(displayValue ?? value).toLocaleString("nb-NO", { maximumFractionDigits: 2 })}{unit ? " " + unit : ""}</div>
       <div style={{ fontSize: 13, color, fontWeight: 600 }}>{description}</div>
     </div>
   );
@@ -262,7 +262,7 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
                 <div style={{ width: 1, backgroundColor: theme.border }} />
                 <Gauge value={sPct} min={0} max={50} label="Soliditet" color={sL.color} description={sL.label} theme={theme} />
                 <div style={{ width: 1, backgroundColor: theme.border }} />
-                <Gauge value={liPct} min={0} max={250} label="Likviditet" color={liL.color} description={liL.label} theme={theme} />
+                <Gauge value={liPct} min={0} max={250} label="Likviditet" color={liL.color} description={liL.label} theme={theme} unit="" displayValue={liPct / 100} />
               </div>
             </div>
           </>
