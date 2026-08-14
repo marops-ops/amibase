@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Enhet } from "@/lib/types";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 
 interface RegnskapAar {
   aar: string;
@@ -239,14 +239,15 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
                 </p>
                 <div style={{ backgroundColor: theme.bg, borderRadius: 12, padding: "16px 8px 8px" }}>
                   <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={grafData} margin={{ top: 4, right: 20, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={theme.border} />
+                    <BarChart data={grafData} margin={{ top: 4, right: 20, left: 0, bottom: 0 }} barGap={6}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={theme.border} vertical={false} />
                       <XAxis dataKey="aar" tick={{ fontSize: 12, fill: theme.textMuted }} />
                       <YAxis tick={{ fontSize: 11, fill: theme.textMuted }} width={65} />
                       <Tooltip contentStyle={{ backgroundColor: theme.card, border: `1px solid ${theme.border}`, borderRadius: 8, fontSize: 13, color: theme.text }} />
-                      <Line type="monotone" dataKey="Inntekter" stroke="#059669" strokeWidth={2.5} dot={{ r: 4, fill: "#059669" }} />
-                      <Line type="monotone" dataKey="Driftsresultat" stroke="#2563eb" strokeWidth={2.5} dot={{ r: 4, fill: "#2563eb" }} />
-                    </LineChart>
+                      <Legend wrapperStyle={{ fontSize: 12, color: theme.textMuted }} />
+                      <Bar dataKey="Inntekter" fill="#059669" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="Driftsresultat" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
