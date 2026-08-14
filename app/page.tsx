@@ -197,6 +197,7 @@ export default function Home() {
         </div>
 
         {/* Scorecards */}
+        <p style={{ fontSize: 13, color: theme.textMuted, marginBottom: 10 }}>Klikk på boksene for å velge hvilke bedriftstyper som skal inkluderes.</p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
           <div style={{ ...s.card, padding: "2rem 1.5rem", textAlign: "center" }}>
             <div style={{ fontSize: 13, color: theme.textMuted, marginBottom: 6 }}>Totalt</div>
@@ -230,6 +231,7 @@ export default function Home() {
         </div>
 
         {/* Bransjefilter */}
+        <p style={{ fontSize: 13, color: theme.textMuted, marginBottom: 10 }}>Hold musepekeren over en hovedkategori for å velge underkategorier innenfor bransjen.</p>
         <BransjeFilter
           tilgjengelige={new Set(BRANSJE_GRUPPER.flatMap(g => g.kategorier))}
           valgte={valgteBransjer}
@@ -241,6 +243,7 @@ export default function Home() {
         />
 
         {/* Søk + filter + eksport */}
+        <p style={{ fontSize: 13, color: theme.textMuted, marginBottom: 10 }}>Søk på navn, poststed eller postnummer, filtrer på fylke, eller avgrens etter lønnsomhet.</p>
         <div style={{ display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
           <div style={{ position: "relative", flex: 1, minWidth: 160 }}>
             <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: theme.textMuted }}>⌕</span>
