@@ -119,7 +119,7 @@ export default function EnhetModal({ enhet, onClose, darkMode }: Props) {
             aarsresultat: r.resultatregnskapResultat?.aarsresultat ?? 0,
             sumEiendeler: r.eiendeler?.sumEiendeler ?? 0,
             sumEgenkapital: r.egenkapitalGjeld?.egenkapital?.sumEgenkapital ?? 0,
-            omlopsmidler: r.eiendeler?.omlopsmidler?.sumOmlopsmidler ?? 0,
+            omlopsmidler: r.eiendeler?.omloepsmidler?.sumOmloepsmidler ?? 0,
             kortsiktigGjeld: r.egenkapitalGjeld?.gjeldOversikt?.kortsiktigGjeld?.sumKortsiktigGjeld ?? 0,
             avskrivninger: r.resultatregnskapResultat?.driftsresultat?.driftsresultatFoerAvskrivninger?.avskrivninger ?? 0,
           })).filter(r => r.aar).sort((a, b) => a.aar.localeCompare(b.aar)).slice(-5);
