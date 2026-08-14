@@ -39,7 +39,14 @@ export async function GET(
 
   if (search) query = query.ilike("navn", `%${search}%`);
   if (fylke) query = query.eq("fylke", fylke);
-  if (kategori) query = query.eq("kategori", kategori);
+  if (kategori) {
+    const kategorier = kategori.split(",");
+    if (kategorier.length === 1) {
+      query = query.eq("kategori", kategorier[0]);
+    } else {
+      query = query.in("kategori", kategorier);
+    }
+  }
   if (lonnsomhet) {
     const verdier = lonnsomhet.split(",");
     if (verdier.length === 1) {
