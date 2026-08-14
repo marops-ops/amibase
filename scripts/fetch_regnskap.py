@@ -1,12 +1,16 @@
 import requests
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from supabase import create_client
 
 REGNSKAP_URL = "https://data.brreg.no/regnskapsregisteret/regnskap/{}"
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_SERVICE_KEY"]
+
+MAX_WORKERS = 25       # samtidige Brreg-kall
+BATCH_UPSERT = 200     # antall rader per batch-skriving til Supabase
 
 def hent_regnskap(orgnr):
     try:
@@ -16,11 +20,11 @@ def hent_regnskap(orgnr):
             headers={"Accept": "application/json"}
         )
         if not r.ok:
-            return None
+            return orgnr, None
         data = r.json()
         items = data if isinstance(data, list) else [data]
         if not items:
-            return None
+            return orgnr, None
         siste = sorted(items, key=lambda x: x.get("regnskapsperiode", {}).get("fraDato", ""), reverse=True)[0]
         inntekter = siste.get("resultatregnskapResultat", {}).get("driftsresultat", {}).get("driftsinntekter", {}).get("sumDriftsinntekter") or 0
         driftsresultat = siste.get("resultatregnskapResultat", {}).get("driftsresultat", {}).get("driftsresultat") or 0
@@ -31,7 +35,7 @@ def hent_regnskap(orgnr):
             lonnsomhet = "god" if margin > 0.1 else "ok" if margin >= 0 else "lav"
         else:
             lonnsomhet = "ingen"
-        return {
+        return orgnr, {
             "aar": aar,
             "inntekter": inntekter,
             "driftsresultat": driftsresultat,
@@ -39,26 +43,27 @@ def hent_regnskap(orgnr):
             "lonnsomhet": lonnsomhet,
         }
     except Exception:
-        return None
+        return orgnr, None
 
 def get_supabase():
     return create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def upsert_med_retry(supabase, orgnr, regnskap, retries=3):
+def batch_upsert(supabase, rader, retries=3):
+    """Skriver en liste med {orgnr, regnskap} i én upsert i stedet for N enkeltkall."""
+    if not rader:
+        return 0
+    payload = [{"orgnr": r["orgnr"], "regnskap": r["regnskap"]} for r in rader]
     for attempt in range(retries):
         try:
-            supabase.table("enheter")\
-                .update({"regnskap": regnskap})\
-                .eq("orgnr", orgnr)\
-                .execute()
-            return True
+            supabase.table("enheter").upsert(payload, on_conflict="orgnr").execute()
+            return len(payload)
         except Exception as e:
             if attempt < retries - 1:
                 time.sleep(2)
                 supabase = get_supabase()
             else:
-                print(f"  ⚠ Gir opp {orgnr}: {e}")
-    return False
+                print(f"  ⚠ Batch feilet ({len(payload)} rader): {e}")
+    return 0
 
 def main():
     supabase = get_supabase()
@@ -67,11 +72,11 @@ def main():
     alle_orgnr = []
     page = 0
     while True:
-        res = supabase.table("enheter")\
-            .select("orgnr")\
-            .in_("form", ["AS","ANS","DA","NUF"])\
-            .is_("regnskap", "null")\
-            .range(page * 1000, (page + 1) * 1000 - 1)\
+        res = supabase.table("enheter") \
+            .select("orgnr") \
+            .in_("form", ["AS", "ANS", "DA", "NUF"]) \
+            .is_("regnskap", "null") \
+            .range(page * 1000, (page + 1) * 1000 - 1) \
             .execute()
         batch = [r["orgnr"] for r in (res.data or [])]
         alle_orgnr.extend(batch)
@@ -87,21 +92,26 @@ def main():
         return
 
     oppdatert = 0
-    for i, orgnr in enumerate(alle_orgnr):
-        # Reconnect hver 5000 for å unngå timeout
-        if i > 0 and i % 5000 == 0:
-            supabase = get_supabase()
-            print(f"  ↺ Reconnect til Supabase ved {i:,}...", flush=True)
+    pending = []
 
-        regnskap = hent_regnskap(orgnr)
-        if regnskap:
-            if upsert_med_retry(supabase, orgnr, regnskap):
-                oppdatert += 1
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        futures = {executor.submit(hent_regnskap, orgnr): orgnr for orgnr in alle_orgnr}
+        ferdig = 0
+        for future in as_completed(futures):
+            orgnr, regnskap = future.result()
+            ferdig += 1
+            if regnskap:
+                pending.append({"orgnr": orgnr, "regnskap": regnskap})
 
-        time.sleep(0.05)
+            if len(pending) >= BATCH_UPSERT:
+                oppdatert += batch_upsert(supabase, pending)
+                pending = []
 
-        if i % 1000 == 0:
-            print(f"  {i:,}/{total:,} — {oppdatert:,} oppdatert...", flush=True)
+            if ferdig % 1000 == 0:
+                print(f"  {ferdig:,}/{total:,} — {oppdatert:,} oppdatert...", flush=True)
+
+    if pending:
+        oppdatert += batch_upsert(supabase, pending)
 
     print(f"\n✓ Ferdig! {oppdatert:,} av {total:,} fikk regnskapstall")
 
